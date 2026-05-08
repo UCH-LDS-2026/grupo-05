@@ -1,0 +1,476 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2200 1400" font-family="'Inter', system-ui, -apple-system, sans-serif">
+  <defs>
+    <!-- Drop shadow for phones -->
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="6"/>
+      <feOffset dx="0" dy="4" result="offsetblur"/>
+      <feComponentTransfer><feFuncA type="linear" slope="0.15"/></feComponentTransfer>
+      <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <!-- Pin marker (visited) -->
+    <g id="pin-visited">
+      <circle cx="0" cy="0" r="8" fill="#3b82f6" stroke="white" stroke-width="2"/>
+      <circle cx="0" cy="0" r="3" fill="white"/>
+    </g>
+    <!-- Pin marker (not visited) -->
+    <g id="pin-notvisited">
+      <circle cx="0" cy="0" r="8" fill="#ef4444" stroke="white" stroke-width="2"/>
+      <circle cx="0" cy="0" r="3" fill="white"/>
+    </g>
+  </defs>
+
+  <!-- Background -->
+  <rect width="2200" height="1400" fill="#f7f8fa"/>
+
+  <!-- Title -->
+  <text x="1100" y="50" text-anchor="middle" font-size="28" font-weight="700" fill="#1f3a5f">Spot — Wireframes de baja fidelidad</text>
+  <text x="1100" y="78" text-anchor="middle" font-size="14" fill="#6b7280">TP1 · Grupo 5 · Licenciatura en Sistemas de Información · Universidad Champagnat 2026</text>
+  <line x1="950" y1="92" x2="1250" y2="92" stroke="#ea8d1f" stroke-width="3"/>
+
+  <!-- ========== 1. LOGIN ========== -->
+  <g transform="translate(60, 160)">
+    <text x="180" y="-10" text-anchor="middle" font-size="13" font-weight="600" fill="#6b7280">1 · LOGIN / REGISTRO</text>
+    <!-- Phone frame -->
+    <rect x="30" y="20" width="300" height="600" rx="36" fill="white" stroke="#1f3a5f" stroke-width="2.5" filter="url(#shadow)"/>
+    <!-- Notch -->
+    <rect x="130" y="28" width="100" height="18" rx="9" fill="#1f3a5f"/>
+    <!-- Status bar -->
+    <text x="55" y="74" font-size="10" fill="#6b7280">9:41</text>
+    <text x="295" y="74" text-anchor="end" font-size="10" fill="#6b7280">◉ 📶 100%</text>
+    <!-- Content: LOGO -->
+    <circle cx="180" cy="150" r="40" fill="#fff5e0" stroke="#ea8d1f" stroke-width="2.5"/>
+    <text x="180" y="162" text-anchor="middle" font-size="36" font-weight="700" fill="#ea8d1f">S</text>
+    <text x="180" y="220" text-anchor="middle" font-size="18" font-weight="700" fill="#1f3a5f">Spot</text>
+    <text x="180" y="242" text-anchor="middle" font-size="11" fill="#6b7280">Descubrí todos los kioscos cerca tuyo</text>
+    <!-- Input email -->
+    <rect x="60" y="290" width="240" height="38" rx="8" fill="#f3f4f6" stroke="#d1d5db"/>
+    <text x="74" y="314" font-size="12" fill="#9ca3af">Email</text>
+    <!-- Input password -->
+    <rect x="60" y="340" width="240" height="38" rx="8" fill="#f3f4f6" stroke="#d1d5db"/>
+    <text x="74" y="364" font-size="12" fill="#9ca3af">Contraseña</text>
+    <!-- Input invite -->
+    <rect x="60" y="390" width="240" height="38" rx="8" fill="#f3f4f6" stroke="#d1d5db"/>
+    <text x="74" y="414" font-size="12" fill="#9ca3af">Invite code (solo registro)</text>
+    <!-- Button -->
+    <rect x="60" y="450" width="240" height="42" rx="10" fill="#1f3a5f"/>
+    <text x="180" y="477" text-anchor="middle" font-size="13" font-weight="600" fill="white">Iniciar sesión</text>
+    <!-- Register link -->
+    <text x="180" y="518" text-anchor="middle" font-size="11" fill="#6b7280">¿Tenés invite code?</text>
+    <text x="180" y="538" text-anchor="middle" font-size="12" font-weight="600" fill="#ea8d1f">Registrate</text>
+  </g>
+
+  <!-- Arrow 1 -> 2 -->
+  <g transform="translate(420, 460)">
+    <path d="M 0 0 L 50 0" stroke="#ea8d1f" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+    <polygon points="50,-6 62,0 50,6" fill="#ea8d1f"/>
+  </g>
+
+  <!-- ========== 2. MAPA ========== -->
+  <g transform="translate(500, 160)">
+    <text x="180" y="-10" text-anchor="middle" font-size="13" font-weight="600" fill="#6b7280">2 · MAPA PRINCIPAL</text>
+    <rect x="30" y="20" width="300" height="600" rx="36" fill="white" stroke="#1f3a5f" stroke-width="2.5" filter="url(#shadow)"/>
+    <rect x="130" y="28" width="100" height="18" rx="9" fill="#1f3a5f"/>
+    <!-- Header -->
+    <rect x="30" y="56" width="300" height="56" fill="#1f3a5f"/>
+    <text x="50" y="90" font-size="14" fill="white">☰</text>
+    <text x="180" y="90" text-anchor="middle" font-size="14" font-weight="600" fill="white">Spot</text>
+    <circle cx="295" cy="84" r="13" fill="#fff5e0" stroke="white" stroke-width="1.5"/>
+    <text x="295" y="89" text-anchor="middle" font-size="11" font-weight="600" fill="#ea8d1f">M</text>
+    <!-- Stats bar -->
+    <rect x="30" y="112" width="300" height="52" fill="#fff8ee"/>
+    <text x="50" y="132" font-size="11" font-weight="600" fill="#1f3a5f">Hola, Matías 👋</text>
+    <text x="50" y="148" font-size="10" fill="#6b7280">Visitados: 7 / 42</text>
+    <!-- Progress bar -->
+    <rect x="140" y="140" width="170" height="10" rx="5" fill="#e5e7eb"/>
+    <rect x="140" y="140" width="29" height="10" rx="5" fill="#ea8d1f"/>
+    <text x="315" y="150" text-anchor="end" font-size="9" font-weight="700" fill="#ea8d1f">17%</text>
+    <!-- Map area -->
+    <rect x="30" y="164" width="300" height="380" fill="#e8f0e4"/>
+    <!-- fake map roads -->
+    <path d="M 30 260 Q 150 240 330 280" stroke="#cbd5a8" stroke-width="8" fill="none" opacity="0.7"/>
+    <path d="M 180 164 Q 200 300 160 544" stroke="#cbd5a8" stroke-width="6" fill="none" opacity="0.7"/>
+    <path d="M 30 420 Q 200 400 330 440" stroke="#cbd5a8" stroke-width="6" fill="none" opacity="0.7"/>
+    <!-- pins -->
+    <use href="#pin-visited" transform="translate(100, 220)"/>
+    <use href="#pin-notvisited" transform="translate(200, 240)"/>
+    <use href="#pin-visited" transform="translate(150, 310)"/>
+    <use href="#pin-notvisited" transform="translate(260, 330)"/>
+    <use href="#pin-notvisited" transform="translate(90, 380)"/>
+    <use href="#pin-visited" transform="translate(220, 420)"/>
+    <use href="#pin-notvisited" transform="translate(170, 480)"/>
+    <use href="#pin-notvisited" transform="translate(280, 500)"/>
+    <!-- Legend -->
+    <rect x="45" y="200" width="105" height="40" rx="6" fill="white" opacity="0.9" stroke="#d1d5db"/>
+    <circle cx="58" cy="214" r="5" fill="#3b82f6"/>
+    <text x="68" y="217" font-size="9" fill="#374151">Visitado</text>
+    <circle cx="58" cy="230" r="5" fill="#ef4444"/>
+    <text x="68" y="233" font-size="9" fill="#374151">No visitado</text>
+    <!-- Tab bar (rounded bottom to match phone frame) -->
+    <path d="M 30 544 L 330 544 L 330 584 Q 330 620 294 620 L 66 620 Q 30 620 30 584 Z" fill="white" stroke="#e5e7eb"/>
+    <rect x="40" y="554" width="90" height="56" rx="10" fill="#fff5e0"/>
+    <text x="85" y="580" text-anchor="middle" font-size="16">🗺️</text>
+    <text x="85" y="600" text-anchor="middle" font-size="9" font-weight="600" fill="#ea8d1f">Mapa</text>
+    <text x="180" y="580" text-anchor="middle" font-size="16" opacity="0.5">📊</text>
+    <text x="180" y="600" text-anchor="middle" font-size="9" fill="#6b7280">Progreso</text>
+    <text x="275" y="580" text-anchor="middle" font-size="16" opacity="0.5">👥</text>
+    <text x="275" y="600" text-anchor="middle" font-size="9" fill="#6b7280">Grupo</text>
+  </g>
+
+  <!-- Arrow 2 -> 3 -->
+  <g transform="translate(860, 460)">
+    <polygon points="0,-6 12,0 0,6" fill="#ea8d1f" transform="translate(50,0)"/>
+    <line x1="0" y1="0" x2="50" y2="0" stroke="#ea8d1f" stroke-width="2"/>
+    <text x="25" y="-12" text-anchor="middle" font-size="10" fill="#6b7280">tocar pin</text>
+  </g>
+
+  <!-- ========== 3. DETALLE KIOSCO ========== -->
+  <g transform="translate(940, 160)">
+    <text x="180" y="-10" text-anchor="middle" font-size="13" font-weight="600" fill="#6b7280">3 · DETALLE DE KIOSCO</text>
+    <rect x="30" y="20" width="300" height="600" rx="36" fill="white" stroke="#1f3a5f" stroke-width="2.5" filter="url(#shadow)"/>
+    <rect x="130" y="28" width="100" height="18" rx="9" fill="#1f3a5f"/>
+    <!-- Header -->
+    <rect x="30" y="56" width="300" height="44" fill="#1f3a5f"/>
+    <text x="50" y="84" font-size="16" fill="white">←</text>
+    <text x="180" y="84" text-anchor="middle" font-size="12" font-weight="600" fill="white">Yes - Lavalle 450</text>
+    <!-- Foto placeholder -->
+    <rect x="46" y="115" width="268" height="110" rx="8" fill="#fff5e0" stroke="#ea8d1f" stroke-dasharray="4 4"/>
+    <text x="180" y="175" text-anchor="middle" font-size="24">📷</text>
+    <text x="180" y="200" text-anchor="middle" font-size="10" fill="#9ca3af">Foto del local</text>
+    <!-- Ratings -->
+    <g font-size="11" fill="#374151">
+      <text x="46" y="253" font-weight="600">Atención</text>
+      <text x="314" y="253" text-anchor="end" fill="#ea8d1f">★★★★☆ 4.2</text>
+      <text x="46" y="273" font-weight="600">Variedad</text>
+      <text x="314" y="273" text-anchor="end" fill="#ea8d1f">★★★★★ 4.8</text>
+      <text x="46" y="293" font-weight="600">Limpieza</text>
+      <text x="314" y="293" text-anchor="end" fill="#ea8d1f">★★★★☆ 4.0</text>
+      <text x="46" y="313" font-weight="600">Precios</text>
+      <text x="314" y="313" text-anchor="end" fill="#ea8d1f">★★★☆☆ 3.1</text>
+      <text x="46" y="333" font-weight="600">Ambiente</text>
+      <text x="314" y="333" text-anchor="end" fill="#ea8d1f">★★★★☆ 4.3</text>
+    </g>
+    <line x1="46" y1="350" x2="314" y2="350" stroke="#e5e7eb"/>
+    <!-- Tags -->
+    <text x="46" y="372" font-size="10" font-weight="600" fill="#6b7280">TAGS MÁS USADOS</text>
+    <rect x="46" y="382" width="84" height="22" rx="11" fill="#dbeafe"/>
+    <text x="88" y="397" text-anchor="middle" font-size="10" fill="#1e40af">buena atención</text>
+    <rect x="136" y="382" width="60" height="22" rx="11" fill="#dcfce7"/>
+    <text x="166" y="397" text-anchor="middle" font-size="10" fill="#166534">variedad</text>
+    <rect x="202" y="382" width="76" height="22" rx="11" fill="#fef3c7"/>
+    <text x="240" y="397" text-anchor="middle" font-size="10" fill="#92400e">tiene arcade</text>
+    <rect x="46" y="410" width="50" height="22" rx="11" fill="#fee2e2"/>
+    <text x="71" y="425" text-anchor="middle" font-size="10" fill="#991b1b">caro</text>
+    <!-- Reviews -->
+    <line x1="46" y1="446" x2="314" y2="446" stroke="#e5e7eb"/>
+    <text x="46" y="464" font-size="10" font-weight="600" fill="#6b7280">RESEÑAS (3)</text>
+    <g font-size="9" fill="#374151">
+      <circle cx="58" cy="484" r="8" fill="#fff5e0"/>
+      <text x="58" y="487" text-anchor="middle" font-weight="600" fill="#ea8d1f" font-size="8">M</text>
+      <text x="72" y="483" font-weight="600">Matías · 4.2</text>
+      <text x="72" y="495" fill="#6b7280">"Muy bueno"</text>
+      <circle cx="58" cy="512" r="8" fill="#dbeafe"/>
+      <text x="58" y="515" text-anchor="middle" font-weight="600" fill="#1e40af" font-size="8">B</text>
+      <text x="72" y="511" font-weight="600">Bauti · 4.5</text>
+      <text x="72" y="523" fill="#6b7280">"Top"</text>
+    </g>
+    <!-- CTA -->
+    <rect x="46" y="550" width="268" height="42" rx="10" fill="#ea8d1f"/>
+    <text x="180" y="577" text-anchor="middle" font-size="13" font-weight="600" fill="white">+ Agregar reseña</text>
+  </g>
+
+  <!-- Arrow 3 -> 4 -->
+  <g transform="translate(1300, 460)">
+    <polygon points="0,-6 12,0 0,6" fill="#ea8d1f" transform="translate(50,0)"/>
+    <line x1="0" y1="0" x2="50" y2="0" stroke="#ea8d1f" stroke-width="2"/>
+    <text x="25" y="-12" text-anchor="middle" font-size="10" fill="#6b7280">CTA</text>
+  </g>
+
+  <!-- ========== 4. FORMULARIO RESEÑA ========== -->
+  <g transform="translate(1380, 160)">
+    <text x="180" y="-10" text-anchor="middle" font-size="13" font-weight="600" fill="#6b7280">4 · FORMULARIO DE RESEÑA</text>
+    <rect x="30" y="20" width="300" height="600" rx="36" fill="white" stroke="#1f3a5f" stroke-width="2.5" filter="url(#shadow)"/>
+    <rect x="130" y="28" width="100" height="18" rx="9" fill="#1f3a5f"/>
+    <rect x="30" y="56" width="300" height="44" fill="#1f3a5f"/>
+    <text x="50" y="84" font-size="16" fill="white">←</text>
+    <text x="180" y="84" text-anchor="middle" font-size="12" font-weight="600" fill="white">Nueva reseña</text>
+    <!-- Subtitle -->
+    <text x="46" y="125" font-size="11" fill="#6b7280">Kiosco</text>
+    <text x="46" y="142" font-size="13" font-weight="600" fill="#1f3a5f">Yes - Lavalle 450</text>
+    <line x1="46" y1="158" x2="314" y2="158" stroke="#e5e7eb"/>
+    <!-- Ratings -->
+    <g font-size="10" fill="#374151">
+      <text x="46" y="180" font-weight="600">Atención</text>
+      <g transform="translate(170, 172)">
+        <circle cx="0" cy="6" r="7" fill="#ea8d1f"/>
+        <circle cx="18" cy="6" r="7" fill="#ea8d1f"/>
+        <circle cx="36" cy="6" r="7" fill="#ea8d1f"/>
+        <circle cx="54" cy="6" r="7" fill="#ea8d1f"/>
+        <circle cx="72" cy="6" r="7" fill="#e5e7eb"/>
+      </g>
+      <text x="46" y="208" font-weight="600">Variedad</text>
+      <g transform="translate(170, 200)">
+        <circle cx="0" cy="6" r="7" fill="#ea8d1f"/>
+        <circle cx="18" cy="6" r="7" fill="#ea8d1f"/>
+        <circle cx="36" cy="6" r="7" fill="#ea8d1f"/>
+        <circle cx="54" cy="6" r="7" fill="#ea8d1f"/>
+        <circle cx="72" cy="6" r="7" fill="#ea8d1f"/>
+      </g>
+      <text x="46" y="236" font-weight="600">Limpieza</text>
+      <g transform="translate(170, 228)">
+        <circle cx="0" cy="6" r="7" fill="#ea8d1f"/>
+        <circle cx="18" cy="6" r="7" fill="#ea8d1f"/>
+        <circle cx="36" cy="6" r="7" fill="#ea8d1f"/>
+        <circle cx="54" cy="6" r="7" fill="#e5e7eb"/>
+        <circle cx="72" cy="6" r="7" fill="#e5e7eb"/>
+      </g>
+      <text x="46" y="264" font-weight="600">Precios</text>
+      <g transform="translate(170, 256)">
+        <circle cx="0" cy="6" r="7" fill="#ea8d1f"/>
+        <circle cx="18" cy="6" r="7" fill="#ea8d1f"/>
+        <circle cx="36" cy="6" r="7" fill="#ea8d1f"/>
+        <circle cx="54" cy="6" r="7" fill="#e5e7eb"/>
+        <circle cx="72" cy="6" r="7" fill="#e5e7eb"/>
+      </g>
+      <text x="46" y="292" font-weight="600">Ambiente</text>
+      <g transform="translate(170, 284)">
+        <circle cx="0" cy="6" r="7" fill="#ea8d1f"/>
+        <circle cx="18" cy="6" r="7" fill="#ea8d1f"/>
+        <circle cx="36" cy="6" r="7" fill="#ea8d1f"/>
+        <circle cx="54" cy="6" r="7" fill="#ea8d1f"/>
+        <circle cx="72" cy="6" r="7" fill="#e5e7eb"/>
+      </g>
+    </g>
+    <line x1="46" y1="310" x2="314" y2="310" stroke="#e5e7eb"/>
+    <text x="46" y="330" font-size="10" font-weight="600" fill="#6b7280">TAGS</text>
+    <rect x="46" y="340" width="90" height="22" rx="11" fill="#ea8d1f"/>
+    <text x="91" y="355" text-anchor="middle" font-size="10" fill="white">✓ buena atención</text>
+    <rect x="142" y="340" width="62" height="22" rx="11" fill="#f3f4f6" stroke="#d1d5db"/>
+    <text x="173" y="355" text-anchor="middle" font-size="10" fill="#6b7280">variedad</text>
+    <rect x="210" y="340" width="76" height="22" rx="11" fill="#ea8d1f"/>
+    <text x="248" y="355" text-anchor="middle" font-size="10" fill="white">✓ arcade</text>
+    <rect x="46" y="368" width="48" height="22" rx="11" fill="#f3f4f6" stroke="#d1d5db"/>
+    <text x="70" y="383" text-anchor="middle" font-size="10" fill="#6b7280">caro</text>
+    <!-- Textarea -->
+    <text x="46" y="412" font-size="10" font-weight="600" fill="#6b7280">COMENTARIO</text>
+    <rect x="46" y="420" width="268" height="60" rx="8" fill="#f3f4f6" stroke="#d1d5db"/>
+    <text x="58" y="442" font-size="11" fill="#9ca3af">Re zarpado el arcade de Tekken...</text>
+    <!-- Photos -->
+    <text x="46" y="500" font-size="10" font-weight="600" fill="#6b7280">FOTOS (2/5)</text>
+    <rect x="46" y="508" width="40" height="40" rx="6" fill="#fff5e0" stroke="#ea8d1f"/>
+    <text x="66" y="532" text-anchor="middle" font-size="14">🖼️</text>
+    <rect x="92" y="508" width="40" height="40" rx="6" fill="#fff5e0" stroke="#ea8d1f"/>
+    <text x="112" y="532" text-anchor="middle" font-size="14">🖼️</text>
+    <rect x="138" y="508" width="40" height="40" rx="6" fill="#f3f4f6" stroke="#d1d5db" stroke-dasharray="3 3"/>
+    <text x="158" y="534" text-anchor="middle" font-size="18" fill="#9ca3af">+</text>
+    <!-- Submit -->
+    <rect x="46" y="568" width="268" height="42" rx="10" fill="#1f3a5f"/>
+    <text x="180" y="595" text-anchor="middle" font-size="13" font-weight="600" fill="white">Publicar reseña</text>
+  </g>
+
+  <!-- Arrow 4 -> 5 -->
+  <g transform="translate(1740, 460)">
+    <polygon points="0,-6 12,0 0,6" fill="#ea8d1f" transform="translate(50,0)"/>
+    <line x1="0" y1="0" x2="50" y2="0" stroke="#ea8d1f" stroke-width="2"/>
+    <text x="25" y="-12" text-anchor="middle" font-size="10" fill="#6b7280">tab</text>
+  </g>
+
+  <!-- ========== 5. PERFIL / LEADERBOARD ========== -->
+  <g transform="translate(1820, 160)">
+    <text x="180" y="-10" text-anchor="middle" font-size="13" font-weight="600" fill="#6b7280">5 · PERFIL + LEADERBOARD</text>
+    <rect x="30" y="20" width="300" height="600" rx="36" fill="white" stroke="#1f3a5f" stroke-width="2.5" filter="url(#shadow)"/>
+    <rect x="130" y="28" width="100" height="18" rx="9" fill="#1f3a5f"/>
+    <rect x="30" y="56" width="300" height="44" fill="#1f3a5f"/>
+    <text x="180" y="84" text-anchor="middle" font-size="12" font-weight="600" fill="white">Mi progreso</text>
+    <!-- Avatar + name -->
+    <circle cx="180" cy="140" r="30" fill="#fff5e0" stroke="#ea8d1f" stroke-width="2"/>
+    <text x="180" y="150" text-anchor="middle" font-size="20" font-weight="700" fill="#ea8d1f">M</text>
+    <text x="180" y="190" text-anchor="middle" font-size="14" font-weight="600" fill="#1f3a5f">Matías López</text>
+    <!-- Stats cards -->
+    <g>
+      <rect x="46" y="210" width="82" height="62" rx="8" fill="#fff8ee" stroke="#fde4bf"/>
+      <text x="87" y="235" text-anchor="middle" font-size="20" font-weight="700" fill="#ea8d1f">7</text>
+      <text x="87" y="252" text-anchor="middle" font-size="8" fill="#6b7280">VISITADOS</text>
+      <text x="87" y="263" text-anchor="middle" font-size="8" fill="#ea8d1f" font-weight="600">17%</text>
+
+      <rect x="139" y="210" width="82" height="62" rx="8" fill="#eff6ff" stroke="#bfdbfe"/>
+      <text x="180" y="235" text-anchor="middle" font-size="20" font-weight="700" fill="#1e40af">5</text>
+      <text x="180" y="252" text-anchor="middle" font-size="8" fill="#6b7280">RESEÑAS</text>
+
+      <rect x="232" y="210" width="82" height="62" rx="8" fill="#fef2f2" stroke="#fecaca"/>
+      <text x="273" y="235" text-anchor="middle" font-size="20" font-weight="700" fill="#991b1b">3 🔥</text>
+      <text x="273" y="252" text-anchor="middle" font-size="8" fill="#6b7280">RACHA (sem)</text>
+    </g>
+    <!-- Leaderboard -->
+    <text x="46" y="300" font-size="10" font-weight="700" fill="#1f3a5f">🏆 LEADERBOARD DEL GRUPO</text>
+    <g font-size="11">
+      <rect x="46" y="310" width="268" height="28" rx="6" fill="#fef9c3"/>
+      <text x="58" y="328" font-size="14">🥇</text>
+      <text x="80" y="328" font-weight="600" fill="#1f3a5f">Grego</text>
+      <text x="302" y="328" text-anchor="end" font-weight="600" fill="#1f3a5f">12</text>
+
+      <rect x="46" y="342" width="268" height="28" rx="6" fill="#f3f4f6"/>
+      <text x="58" y="360" font-size="14">🥈</text>
+      <text x="80" y="360" font-weight="600" fill="#1f3a5f">Bauti</text>
+      <text x="302" y="360" text-anchor="end" font-weight="600" fill="#1f3a5f">9</text>
+
+      <rect x="46" y="374" width="268" height="28" rx="6" fill="#fef3c7"/>
+      <text x="58" y="392" font-size="14">🥉</text>
+      <text x="80" y="392" font-weight="600" fill="#ea8d1f">Matías (vos)</text>
+      <text x="302" y="392" text-anchor="end" font-weight="600" fill="#ea8d1f">7</text>
+
+      <text x="58" y="422" fill="#6b7280">4</text>
+      <text x="80" y="422" fill="#374151">Juan</text>
+      <text x="302" y="422" text-anchor="end" fill="#374151">4</text>
+
+      <text x="58" y="446" fill="#6b7280">5</text>
+      <text x="80" y="446" fill="#374151">Tomi</text>
+      <text x="302" y="446" text-anchor="end" fill="#374151">2</text>
+    </g>
+    <line x1="46" y1="468" x2="314" y2="468" stroke="#e5e7eb"/>
+    <!-- Timeline -->
+    <text x="46" y="490" font-size="10" font-weight="700" fill="#1f3a5f">📣 ACTIVIDAD RECIENTE</text>
+    <g font-size="10" fill="#374151">
+      <circle cx="58" cy="510" r="4" fill="#ea8d1f"/>
+      <text x="70" y="513">Grego reseñó Yes Lavalle</text>
+      <text x="305" y="513" text-anchor="end" fill="#9ca3af" font-size="8">2h</text>
+
+      <circle cx="58" cy="530" r="4" fill="#3b82f6"/>
+      <text x="70" y="533">Bauti visitó Yes Godoy Cruz</text>
+      <text x="305" y="533" text-anchor="end" fill="#9ca3af" font-size="8">5h</text>
+
+      <circle cx="58" cy="550" r="4" fill="#ea8d1f"/>
+      <text x="70" y="553">Matías reseñó Yes Centro</text>
+      <text x="305" y="553" text-anchor="end" fill="#9ca3af" font-size="8">1d</text>
+    </g>
+    <!-- Tab bar footer (rounded bottom to match phone frame) -->
+    <path d="M 30 576 L 330 576 L 330 584 Q 330 620 294 620 L 66 620 Q 30 620 30 584 Z" fill="white" stroke="#e5e7eb"/>
+    <text x="85" y="602" text-anchor="middle" font-size="14" opacity="0.5">🗺️</text>
+    <text x="180" y="602" text-anchor="middle" font-size="14" opacity="0.5">📊</text>
+    <rect x="240" y="584" width="70" height="28" rx="8" fill="#fff5e0"/>
+    <text x="275" y="602" text-anchor="middle" font-size="14">👥</text>
+  </g>
+
+  <!-- FLOW NAVIGATION at bottom -->
+  <g transform="translate(0, 900)">
+    <rect x="60" y="0" width="2080" height="420" rx="12" fill="white" stroke="#e5e7eb"/>
+    <text x="1100" y="40" text-anchor="middle" font-size="18" font-weight="700" fill="#1f3a5f">Flujo de navegación &amp; arquitectura del MVP</text>
+    <line x1="960" y1="54" x2="1240" y2="54" stroke="#ea8d1f" stroke-width="2"/>
+
+    <!-- ============ ROW 1: Login → Mapa → Detalle → Form ============ -->
+    <!-- Box: Login -->
+    <g transform="translate(140, 100)">
+      <rect width="150" height="70" rx="10" fill="#eff6ff" stroke="#1e40af" stroke-width="1.5"/>
+      <text x="75" y="32" text-anchor="middle" font-size="13" font-weight="700" fill="#1e40af">Login</text>
+      <text x="75" y="52" text-anchor="middle" font-size="10" fill="#6b7280">Entry point</text>
+    </g>
+    <!-- Arrow Login → Mapa -->
+    <g>
+      <line x1="290" y1="135" x2="388" y2="135" stroke="#6b7280" stroke-width="1.8"/>
+      <polygon points="394,135 384,130 384,140" fill="#6b7280"/>
+      <text x="339" y="128" text-anchor="middle" font-size="10" fill="#6b7280">autenticar</text>
+    </g>
+
+    <!-- Box: Mapa -->
+    <g transform="translate(400, 100)">
+      <rect width="150" height="70" rx="10" fill="#fff8ee" stroke="#ea8d1f" stroke-width="1.5"/>
+      <text x="75" y="28" text-anchor="middle" font-size="13" font-weight="700" fill="#ea8d1f">Mapa (home)</text>
+      <text x="75" y="48" text-anchor="middle" font-size="10" fill="#6b7280">Pins visitado /</text>
+      <text x="75" y="60" text-anchor="middle" font-size="10" fill="#6b7280">no visitado</text>
+    </g>
+    <!-- Arrow Mapa → Detalle -->
+    <g>
+      <line x1="550" y1="135" x2="648" y2="135" stroke="#6b7280" stroke-width="1.8"/>
+      <polygon points="654,135 644,130 644,140" fill="#6b7280"/>
+      <text x="599" y="128" text-anchor="middle" font-size="10" fill="#6b7280">tocar pin</text>
+    </g>
+
+    <!-- Box: Detalle -->
+    <g transform="translate(660, 100)">
+      <rect width="150" height="70" rx="10" fill="#f0f9ff" stroke="#0369a1" stroke-width="1.5"/>
+      <text x="75" y="28" text-anchor="middle" font-size="13" font-weight="700" fill="#0369a1">Detalle kiosco</text>
+      <text x="75" y="48" text-anchor="middle" font-size="10" fill="#6b7280">Info + reseñas</text>
+      <text x="75" y="60" text-anchor="middle" font-size="10" fill="#6b7280">agregadas</text>
+    </g>
+    <!-- Arrow Detalle → Form -->
+    <g>
+      <line x1="810" y1="135" x2="908" y2="135" stroke="#6b7280" stroke-width="1.8"/>
+      <polygon points="914,135 904,130 904,140" fill="#6b7280"/>
+      <text x="859" y="128" text-anchor="middle" font-size="10" fill="#6b7280">CTA reseñar</text>
+    </g>
+
+    <!-- Box: Form -->
+    <g transform="translate(920, 100)">
+      <rect width="150" height="70" rx="10" fill="#fef3c7" stroke="#92400e" stroke-width="1.5"/>
+      <text x="75" y="28" text-anchor="middle" font-size="13" font-weight="700" fill="#92400e">Form reseña</text>
+      <text x="75" y="48" text-anchor="middle" font-size="10" fill="#6b7280">Ratings + tags</text>
+      <text x="75" y="60" text-anchor="middle" font-size="10" fill="#6b7280">+ fotos</text>
+    </g>
+
+    <!-- Dashed back arrow Form → Detalle (above row 1) -->
+    <g>
+      <path d="M 995 100 C 950 55 820 55 748 100" stroke="#6b7280" stroke-width="1.5" fill="none" stroke-dasharray="5 4"/>
+      <polygon points="748,100 758,93 760,105" fill="#6b7280"/>
+      <text x="872" y="52" text-anchor="middle" font-size="10" fill="#6b7280" font-style="italic">al publicar, vuelve al detalle</text>
+    </g>
+
+    <!-- ============ ROW 2: Perfil below Mapa (vertical tab flow) ============ -->
+    <!-- Vertical double-arrow Mapa ↔ Perfil -->
+    <g>
+      <line x1="475" y1="172" x2="475" y2="238" stroke="#6b7280" stroke-width="1.8"/>
+      <polygon points="475,244 470,234 480,234" fill="#6b7280"/>
+      <polygon points="475,166 470,176 480,176" fill="#6b7280"/>
+      <text x="485" y="212" font-size="10" fill="#6b7280">tab</text>
+    </g>
+
+    <!-- Box: Perfil -->
+    <g transform="translate(400, 246)">
+      <rect width="150" height="70" rx="10" fill="#f3e8ff" stroke="#6b21a8" stroke-width="1.5"/>
+      <text x="75" y="28" text-anchor="middle" font-size="13" font-weight="700" fill="#6b21a8">Perfil</text>
+      <text x="75" y="48" text-anchor="middle" font-size="10" fill="#6b7280">Stats + Leaderboard</text>
+      <text x="75" y="60" text-anchor="middle" font-size="10" fill="#6b7280">+ Timeline</text>
+    </g>
+
+    <!-- ============ LEGEND on the right ============ -->
+    <g transform="translate(1220, 100)">
+      <text x="0" y="0" font-size="13" font-weight="700" fill="#1f3a5f">Leyenda · Funcionalidades core del MVP</text>
+      <g transform="translate(0, 22)">
+        <rect x="0" y="0" width="14" height="14" rx="3" fill="#eff6ff" stroke="#1e40af" stroke-width="1.5"/>
+        <text x="24" y="12" font-size="11" fill="#374151"><tspan font-weight="700">F1</tspan> · Autenticación por invite code</text>
+      </g>
+      <g transform="translate(0, 46)">
+        <rect x="0" y="0" width="14" height="14" rx="3" fill="#fff8ee" stroke="#ea8d1f" stroke-width="1.5"/>
+        <text x="24" y="12" font-size="11" fill="#374151"><tspan font-weight="700">F2</tspan> · Mapa interactivo de kioscos</text>
+      </g>
+      <g transform="translate(0, 70)">
+        <rect x="0" y="0" width="14" height="14" rx="3" fill="#f0f9ff" stroke="#0369a1" stroke-width="1.5"/>
+        <text x="24" y="12" font-size="11" fill="#374151"><tspan font-weight="700">F3</tspan> · Detalle del kiosco + reseñas agregadas</text>
+      </g>
+      <g transform="translate(0, 94)">
+        <rect x="0" y="0" width="14" height="14" rx="3" fill="#fef3c7" stroke="#92400e" stroke-width="1.5"/>
+        <text x="24" y="12" font-size="11" fill="#374151"><tspan font-weight="700">F3 bis</tspan> · Creación de reseña (5 categorías)</text>
+      </g>
+      <g transform="translate(0, 118)">
+        <rect x="0" y="0" width="14" height="14" rx="3" fill="#f3e8ff" stroke="#6b21a8" stroke-width="1.5"/>
+        <text x="24" y="12" font-size="11" fill="#374151"><tspan font-weight="700">F4 + F5</tspan> · Progreso personal, Leaderboard y Timeline</text>
+      </g>
+
+      <!-- Arrow legend -->
+      <g transform="translate(0, 160)">
+        <text x="0" y="0" font-size="12" font-weight="700" fill="#1f3a5f">Convenciones</text>
+        <g transform="translate(0, 18)">
+          <line x1="0" y1="7" x2="32" y2="7" stroke="#6b7280" stroke-width="1.8"/>
+          <polygon points="38,7 28,2 28,12" fill="#6b7280"/>
+          <text x="52" y="11" font-size="11" fill="#374151">Flujo principal (acción del usuario)</text>
+        </g>
+        <g transform="translate(0, 42)">
+          <line x1="0" y1="7" x2="32" y2="7" stroke="#6b7280" stroke-width="1.5" stroke-dasharray="5 4"/>
+          <polygon points="38,7 28,2 28,12" fill="#6b7280"/>
+          <text x="52" y="11" font-size="11" fill="#374151">Retorno / post-acción</text>
+        </g>
+      </g>
+    </g>
+
+    <!-- Footer note -->
+    <text x="140" y="380" font-size="11" fill="#6b7280" font-style="italic">Wireframe de baja fidelidad (SVG). Representa estructura, jerarquía y flujo de navegación. El diseño visual final se definirá en TP3.</text>
+  </g>
+</svg>
