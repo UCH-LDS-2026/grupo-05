@@ -1,7 +1,103 @@
-node_modules
+# =====================================================================
+#  Spot — .gitignore
+#  Stack: Expo (React Native) + Next.js + NestJS + Prisma + PostgreSQL
+# =====================================================================
+
+# ---- Node / npm / pnpm / yarn -----
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.pnpm-store/
+.npm/
+.yarn/install-state.gz
+
+# ---- Builds y outputs --------------
+dist/
+build/
+out/
+.next/
+.expo/
+.expo-shared/
+.turbo/
+*.tsbuildinfo
+
+# ---- Variables de entorno ----------
 .env
-__pycache__
-*.log
-dist
-build
+.env.local
+.env.*.local
+.env.development
+.env.production
+.env.test
+!.env.example
+
+# ---- Prisma ------------------------
+# Generated client se commitea según convención del equipo;
+# de momento lo ignoramos para mantener el repo liviano.
+prisma/generated/
+*.db
+*.db-journal
+
+# ---- React Native / Expo -----------
+# Native builds
+ios/Pods/
+ios/build/
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties
+*.keystore
+!debug.keystore
+*.jks
+*.p12
+*.mobileprovision
+
+# Metro / Watchman
+.metro-health-check*
+.haste_cache/
+
+# ---- Next.js (panel owner/admin) ---
+.vercel
+next-env.d.ts
+
+# ---- Testing -----------------------
+coverage/
+*.lcov
+.nyc_output/
+.jest/
+
+# ---- Editor / IDE ------------------
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+.idea/
+*.swp
+*.swo
+*~
+
+# ---- OS ----------------------------
 .DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# ---- Python (scripts auxiliares) ---
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+
+# ---- Logs --------------------------
+*.log
+logs/
+
+# ---- Docker ------------------------
+# Mantener docker-compose.yml; ignorar overrides locales
+docker-compose.override.yml
+.docker/
+
+# ---- Cloudflare R2 / archivos -----
+uploads/
+tmp/
