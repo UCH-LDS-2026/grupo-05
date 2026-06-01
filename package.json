@@ -1,0 +1,26 @@
+{
+  "name": "spot",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Spot — plataforma two-sided para kioscos. MVP slice player (UCH Lab. Desarrollo de Software, Grupo 5).",
+  "scripts": {
+    "db:up": "docker-compose up -d db",
+    "db:down": "docker-compose down",
+    "api:dev": "pnpm --filter @spot/api start:dev",
+    "app:web": "pnpm --filter @spot/app web",
+    "seed": "pnpm --filter @spot/api seed"
+  },
+  "engines": {
+    "node": ">=20",
+    "pnpm": ">=9"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@prisma/client",
+      "@prisma/engines",
+      "prisma",
+      "esbuild",
+      "@nestjs/core"
+    ]
+  }
+}
