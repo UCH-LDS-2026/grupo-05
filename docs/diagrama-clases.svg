@@ -1,0 +1,381 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1900 1500" font-family="'Inter', system-ui, -apple-system, sans-serif">
+  <defs>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="3"/>
+      <feOffset dx="0" dy="2" result="offsetblur"/>
+      <feComponentTransfer><feFuncA type="linear" slope="0.12"/></feComponentTransfer>
+      <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <marker id="inherit" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="14" markerHeight="14" orient="auto">
+      <polygon points="0,0 12,6 0,12" fill="white" stroke="#1f3a5f" stroke-width="1.5"/>
+    </marker>
+    <marker id="composition" viewBox="0 0 14 8" refX="0" refY="4" markerWidth="14" markerHeight="8" orient="auto">
+      <polygon points="0,4 7,0 14,4 7,8" fill="#1f3a5f" stroke="#1f3a5f"/>
+    </marker>
+    <marker id="aggregation" viewBox="0 0 14 8" refX="0" refY="4" markerWidth="14" markerHeight="8" orient="auto">
+      <polygon points="0,4 7,0 14,4 7,8" fill="white" stroke="#1f3a5f" stroke-width="1.5"/>
+    </marker>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1900" height="1500" fill="#f7f8fa"/>
+
+  <!-- Title -->
+  <text x="950" y="46" text-anchor="middle" font-size="26" font-weight="700" fill="#1f3a5f">Spot — Diagrama de Clases del Dominio</text>
+  <text x="950" y="72" text-anchor="middle" font-size="13" fill="#6b7280">TP2 · Grupo 5 · Licenciatura en Sistemas de Información · Universidad Champagnat 2026</text>
+  <line x1="800" y1="86" x2="1100" y2="86" stroke="#ea8d1f" stroke-width="3"/>
+
+  <!-- ============================================================== -->
+  <!-- ROW 1: User (abstract base)                                      -->
+  <!-- ============================================================== -->
+  <g transform="translate(830, 120)">
+    <rect x="0" y="0" width="240" height="180" rx="6" fill="white" stroke="#1f3a5f" stroke-width="2" filter="url(#shadow)"/>
+    <rect x="0" y="0" width="240" height="50" fill="#1f3a5f"/>
+    <text x="120" y="22" text-anchor="middle" font-size="11" font-style="italic" fill="#fff5e0">«abstract»</text>
+    <text x="120" y="40" text-anchor="middle" font-size="15" font-weight="700" fill="white">User</text>
+    <line x1="0" y1="50" x2="240" y2="50" stroke="#1f3a5f"/>
+    <text x="14" y="74" font-size="11.5" fill="#1f2937">- id: UUID</text>
+    <text x="14" y="92" font-size="11.5" fill="#1f2937">- email: string</text>
+    <text x="14" y="110" font-size="11.5" fill="#1f2937">- passwordHash: string</text>
+    <text x="14" y="128" font-size="11.5" fill="#1f2937">- role: enum</text>
+    <text x="14" y="146" font-size="11.5" fill="#1f2937">- createdAt: DateTime</text>
+    <line x1="0" y1="156" x2="240" y2="156" stroke="#e5e7eb"/>
+    <text x="14" y="172" font-size="11" font-style="italic" fill="#6b7280">+ login(): Token</text>
+  </g>
+
+  <!-- ============================================================== -->
+  <!-- ROW 2: InviteCode | Player | Owner | Admin | Kiosk              -->
+  <!-- ============================================================== -->
+
+  <!-- InviteCode (left) -->
+  <g transform="translate(60, 440)">
+    <rect x="0" y="0" width="220" height="160" rx="6" fill="white" stroke="#1f3a5f" stroke-width="2" filter="url(#shadow)"/>
+    <rect x="0" y="0" width="220" height="34" fill="#1f3a5f"/>
+    <text x="110" y="22" text-anchor="middle" font-size="14" font-weight="700" fill="white">InviteCode</text>
+    <line x1="0" y1="34" x2="220" y2="34" stroke="#1f3a5f"/>
+    <text x="14" y="56" font-size="11.5" fill="#1f2937">- code: string</text>
+    <text x="14" y="74" font-size="11.5" fill="#1f2937">- createdBy: Admin</text>
+    <text x="14" y="92" font-size="11.5" fill="#1f2937">- usedBy: Player?</text>
+    <text x="14" y="110" font-size="11.5" fill="#1f2937">- usedAt: DateTime?</text>
+    <text x="14" y="128" font-size="11.5" fill="#1f2937">- expiresAt: DateTime</text>
+    <text x="14" y="146" font-size="11.5" fill="#1f2937">- isActive: boolean</text>
+  </g>
+
+  <!-- Player -->
+  <g transform="translate(370, 400)">
+    <rect x="0" y="0" width="240" height="240" rx="6" fill="white" stroke="#ea8d1f" stroke-width="2" filter="url(#shadow)"/>
+    <rect x="0" y="0" width="240" height="34" fill="#ea8d1f"/>
+    <text x="120" y="22" text-anchor="middle" font-size="14" font-weight="700" fill="white">Player</text>
+    <line x1="0" y1="34" x2="240" y2="34" stroke="#ea8d1f"/>
+    <text x="14" y="56" font-size="11.5" fill="#1f2937">- nickname: string</text>
+    <text x="14" y="74" font-size="11.5" fill="#1f2937">- avatarUrl: string?</text>
+    <text x="14" y="92" font-size="11.5" fill="#1f2937">- totalVisits: int</text>
+    <text x="14" y="110" font-size="11.5" fill="#1f2937">- currentStreak: int</text>
+    <text x="14" y="128" font-size="11.5" fill="#1f2937">- joinedVia: InviteCode</text>
+    <line x1="0" y1="142" x2="240" y2="142" stroke="#e5e7eb"/>
+    <text x="14" y="160" font-size="11" font-style="italic" fill="#6b7280">+ visit(kiosk): Visit</text>
+    <text x="14" y="178" font-size="11" font-style="italic" fill="#6b7280">+ review(k, ratings): Review</text>
+    <text x="14" y="196" font-size="11" font-style="italic" fill="#6b7280">+ redeem(promo): Redemption</text>
+    <text x="14" y="214" font-size="11" font-style="italic" fill="#6b7280">+ stats(): PlayerStats</text>
+  </g>
+
+  <!-- Owner -->
+  <g transform="translate(720, 400)">
+    <rect x="0" y="0" width="240" height="240" rx="6" fill="white" stroke="#0284c7" stroke-width="2" filter="url(#shadow)"/>
+    <rect x="0" y="0" width="240" height="34" fill="#0284c7"/>
+    <text x="120" y="22" text-anchor="middle" font-size="14" font-weight="700" fill="white">Owner</text>
+    <line x1="0" y1="34" x2="240" y2="34" stroke="#0284c7"/>
+    <text x="14" y="56" font-size="11.5" fill="#1f2937">- fullName: string</text>
+    <text x="14" y="74" font-size="11.5" fill="#1f2937">- phone: string</text>
+    <text x="14" y="92" font-size="11.5" fill="#1f2937">- status: enum</text>
+    <text x="14" y="108" font-size="10.5" fill="#9ca3af">  (pending|active|suspended)</text>
+    <text x="14" y="126" font-size="11.5" fill="#1f2937">- verifiedAt: DateTime?</text>
+    <line x1="0" y1="138" x2="240" y2="138" stroke="#e5e7eb"/>
+    <text x="14" y="158" font-size="11" font-style="italic" fill="#6b7280">+ registerKiosk(data): Kiosk</text>
+    <text x="14" y="176" font-size="11" font-style="italic" fill="#6b7280">+ createPromotion(rules): Promotion</text>
+    <text x="14" y="194" font-size="11" font-style="italic" fill="#6b7280">+ validateRedemption(code)</text>
+    <text x="14" y="212" font-size="11" font-style="italic" fill="#6b7280">+ dashboard(): Stats</text>
+  </g>
+
+  <!-- Admin -->
+  <g transform="translate(1080, 400)">
+    <rect x="0" y="0" width="240" height="200" rx="6" fill="white" stroke="#16a34a" stroke-width="2" filter="url(#shadow)"/>
+    <rect x="0" y="0" width="240" height="34" fill="#16a34a"/>
+    <text x="120" y="22" text-anchor="middle" font-size="14" font-weight="700" fill="white">Admin</text>
+    <line x1="0" y1="34" x2="240" y2="34" stroke="#16a34a"/>
+    <text x="14" y="56" font-size="11.5" fill="#1f2937">- permissions: string[]</text>
+    <line x1="0" y1="68" x2="240" y2="68" stroke="#e5e7eb"/>
+    <text x="14" y="88" font-size="11" font-style="italic" fill="#6b7280">+ approveOwner(owner)</text>
+    <text x="14" y="106" font-size="11" font-style="italic" fill="#6b7280">+ rejectOwner(owner, reason)</text>
+    <text x="14" y="124" font-size="11" font-style="italic" fill="#6b7280">+ generateInviteCode()</text>
+    <text x="14" y="142" font-size="11" font-style="italic" fill="#6b7280">+ moderateReview(review)</text>
+    <text x="14" y="160" font-size="11" font-style="italic" fill="#6b7280">+ curateTags()</text>
+    <text x="14" y="178" font-size="11" font-style="italic" fill="#6b7280">+ globalStats(): Report</text>
+  </g>
+
+  <!-- Kiosk (right) -->
+  <g transform="translate(1440, 400)">
+    <rect x="0" y="0" width="240" height="240" rx="6" fill="white" stroke="#1f3a5f" stroke-width="2" filter="url(#shadow)"/>
+    <rect x="0" y="0" width="240" height="34" fill="#1f3a5f"/>
+    <text x="120" y="22" text-anchor="middle" font-size="14" font-weight="700" fill="white">Kiosk</text>
+    <line x1="0" y1="34" x2="240" y2="34" stroke="#1f3a5f"/>
+    <text x="14" y="56" font-size="11.5" fill="#1f2937">- id: UUID</text>
+    <text x="14" y="74" font-size="11.5" fill="#1f2937">- name: string</text>
+    <text x="14" y="92" font-size="11.5" fill="#1f2937">- chain: string?</text>
+    <text x="14" y="110" font-size="11.5" fill="#1f2937">- address: string</text>
+    <text x="14" y="128" font-size="11.5" fill="#1f2937">- latitude: decimal</text>
+    <text x="14" y="146" font-size="11.5" fill="#1f2937">- longitude: decimal</text>
+    <text x="14" y="164" font-size="11.5" fill="#1f2937">- openingHours: string</text>
+    <text x="14" y="182" font-size="11.5" fill="#1f2937">- photoUrl: string?</text>
+    <text x="14" y="200" font-size="11.5" fill="#1f2937">- avgRating: decimal</text>
+    <text x="14" y="218" font-size="11.5" fill="#1f2937">- ownerId: UUID</text>
+  </g>
+
+  <!-- ============================================================== -->
+  <!-- ROW 3: Visit | Review | Promotion | Redemption                  -->
+  <!-- ============================================================== -->
+
+  <!-- Visit -->
+  <g transform="translate(60, 760)">
+    <rect x="0" y="0" width="220" height="170" rx="6" fill="white" stroke="#1f3a5f" stroke-width="2" filter="url(#shadow)"/>
+    <rect x="0" y="0" width="220" height="34" fill="#1f3a5f"/>
+    <text x="110" y="22" text-anchor="middle" font-size="14" font-weight="700" fill="white">Visit</text>
+    <line x1="0" y1="34" x2="220" y2="34" stroke="#1f3a5f"/>
+    <text x="14" y="56" font-size="11.5" fill="#1f2937">- id: UUID</text>
+    <text x="14" y="74" font-size="11.5" fill="#1f2937">- player: Player</text>
+    <text x="14" y="92" font-size="11.5" fill="#1f2937">- kiosk: Kiosk</text>
+    <text x="14" y="110" font-size="11.5" fill="#1f2937">- amountSpent: decimal?</text>
+    <text x="14" y="128" font-size="11.5" fill="#1f2937">- products: Product[]</text>
+    <text x="14" y="146" font-size="11.5" fill="#1f2937">- visitedAt: DateTime</text>
+    <text x="14" y="164" font-size="11.5" fill="#1f2937">- source: enum</text>
+  </g>
+
+  <!-- Review -->
+  <g transform="translate(330, 760)">
+    <rect x="0" y="0" width="240" height="220" rx="6" fill="white" stroke="#1f3a5f" stroke-width="2" filter="url(#shadow)"/>
+    <rect x="0" y="0" width="240" height="34" fill="#1f3a5f"/>
+    <text x="120" y="22" text-anchor="middle" font-size="14" font-weight="700" fill="white">Review</text>
+    <line x1="0" y1="34" x2="240" y2="34" stroke="#1f3a5f"/>
+    <text x="14" y="56" font-size="11.5" fill="#1f2937">- id: UUID</text>
+    <text x="14" y="74" font-size="11.5" fill="#1f2937">- player: Player</text>
+    <text x="14" y="92" font-size="11.5" fill="#1f2937">- kiosk: Kiosk</text>
+    <text x="14" y="110" font-size="11.5" fill="#1f2937">- attentionRating: int (1-5)</text>
+    <text x="14" y="128" font-size="11.5" fill="#1f2937">- varietyRating: int (1-5)</text>
+    <text x="14" y="146" font-size="11.5" fill="#1f2937">- cleanRating: int (1-5)</text>
+    <text x="14" y="164" font-size="11.5" fill="#1f2937">- priceRating: int (1-5)</text>
+    <text x="14" y="182" font-size="11.5" fill="#1f2937">- ambienceRating: int (1-5)</text>
+    <text x="14" y="200" font-size="11.5" fill="#1f2937">- comment: string?</text>
+    <text x="14" y="218" font-size="11.5" fill="#1f2937">- photos: string[]</text>
+  </g>
+
+  <!-- Promotion -->
+  <g transform="translate(640, 760)">
+    <rect x="0" y="0" width="240" height="240" rx="6" fill="white" stroke="#0284c7" stroke-width="2" filter="url(#shadow)"/>
+    <rect x="0" y="0" width="240" height="34" fill="#0284c7"/>
+    <text x="120" y="22" text-anchor="middle" font-size="14" font-weight="700" fill="white">Promotion</text>
+    <line x1="0" y1="34" x2="240" y2="34" stroke="#0284c7"/>
+    <text x="14" y="56" font-size="11.5" fill="#1f2937">- id: UUID</text>
+    <text x="14" y="74" font-size="11.5" fill="#1f2937">- kiosk: Kiosk</text>
+    <text x="14" y="92" font-size="11.5" fill="#1f2937">- title: string</text>
+    <text x="14" y="110" font-size="11.5" fill="#1f2937">- rewardType: enum</text>
+    <text x="14" y="126" font-size="10.5" fill="#9ca3af">  (free|discount|2x1)</text>
+    <text x="14" y="146" font-size="11.5" fill="#1f2937">- rewardValue: string</text>
+    <text x="14" y="164" font-size="11.5" fill="#1f2937">- capPerUser: int</text>
+    <text x="14" y="182" font-size="11.5" fill="#1f2937">- capPerPeriod: int</text>
+    <text x="14" y="200" font-size="11.5" fill="#1f2937">- capTotal: int?</text>
+    <text x="14" y="218" font-size="11.5" fill="#1f2937">- expiresAt: DateTime</text>
+  </g>
+
+  <!-- Redemption -->
+  <g transform="translate(960, 760)">
+    <rect x="0" y="0" width="240" height="200" rx="6" fill="white" stroke="#0284c7" stroke-width="2" filter="url(#shadow)"/>
+    <rect x="0" y="0" width="240" height="34" fill="#0284c7"/>
+    <text x="120" y="22" text-anchor="middle" font-size="14" font-weight="700" fill="white">Redemption</text>
+    <line x1="0" y1="34" x2="240" y2="34" stroke="#0284c7"/>
+    <text x="14" y="56" font-size="11.5" fill="#1f2937">- id: UUID</text>
+    <text x="14" y="74" font-size="11.5" fill="#1f2937">- player: Player</text>
+    <text x="14" y="92" font-size="11.5" fill="#1f2937">- promotion: Promotion</text>
+    <text x="14" y="110" font-size="11.5" fill="#1f2937">- code: string (6 chars)</text>
+    <text x="14" y="128" font-size="11.5" fill="#1f2937">- qrUrl: string</text>
+    <text x="14" y="146" font-size="11.5" fill="#1f2937">- status: enum</text>
+    <text x="14" y="162" font-size="10.5" fill="#9ca3af">  (pending|consumed|expired)</text>
+    <text x="14" y="182" font-size="11.5" fill="#1f2937">- consumedAt: DateTime?</text>
+  </g>
+
+  <!-- PromotionRule -->
+  <g transform="translate(1280, 760)">
+    <rect x="0" y="0" width="260" height="200" rx="6" fill="white" stroke="#0284c7" stroke-width="2" filter="url(#shadow)"/>
+    <rect x="0" y="0" width="260" height="34" fill="#0284c7"/>
+    <text x="130" y="22" text-anchor="middle" font-size="14" font-weight="700" fill="white">PromotionRule</text>
+    <line x1="0" y1="34" x2="260" y2="34" stroke="#0284c7"/>
+    <text x="14" y="56" font-size="11.5" fill="#1f2937">- id: UUID</text>
+    <text x="14" y="74" font-size="11.5" fill="#1f2937">- promotion: Promotion</text>
+    <text x="14" y="92" font-size="11.5" fill="#1f2937">- type: enum</text>
+    <text x="14" y="108" font-size="10.5" fill="#9ca3af">  (frequency|amount|products)</text>
+    <text x="14" y="128" font-size="11.5" fill="#1f2937">- params: JSON</text>
+    <text x="14" y="144" font-size="10.5" fill="#9ca3af">  ej: {minVisits:3, windowDays:7}</text>
+    <text x="14" y="164" font-size="11.5" fill="#1f2937">- audienceFilter: JSON?</text>
+    <text x="14" y="182" font-size="11.5" fill="#1f2937">- order: int</text>
+  </g>
+
+  <!-- ============================================================== -->
+  <!-- ROW 4: Tag                                                       -->
+  <!-- ============================================================== -->
+
+  <!-- Tag -->
+  <g transform="translate(330, 1060)">
+    <rect x="0" y="0" width="220" height="140" rx="6" fill="white" stroke="#1f3a5f" stroke-width="2" filter="url(#shadow)"/>
+    <rect x="0" y="0" width="220" height="34" fill="#1f3a5f"/>
+    <text x="110" y="22" text-anchor="middle" font-size="14" font-weight="700" fill="white">Tag</text>
+    <line x1="0" y1="34" x2="220" y2="34" stroke="#1f3a5f"/>
+    <text x="14" y="56" font-size="11.5" fill="#1f2937">- id: UUID</text>
+    <text x="14" y="74" font-size="11.5" fill="#1f2937">- name: string</text>
+    <text x="14" y="92" font-size="11.5" fill="#1f2937">- category: enum</text>
+    <text x="14" y="108" font-size="10.5" fill="#9ca3af">  (positive|negative|info)</text>
+    <text x="14" y="128" font-size="11.5" fill="#1f2937">- icon: string?</text>
+  </g>
+
+  <!-- ============================================================== -->
+  <!-- RELACIONES                                                       -->
+  <!-- ============================================================== -->
+
+  <!-- Herencia: Player -> User -->
+  <g stroke="#1f3a5f" stroke-width="1.5" fill="none">
+    <line x1="490" y1="400" x2="490" y2="350"/>
+    <line x1="490" y1="350" x2="830" y2="350"/>
+    <line x1="830" y1="350" x2="830" y2="300" marker-end="url(#inherit)"/>
+  </g>
+
+  <!-- Herencia: Owner -> User -->
+  <g stroke="#1f3a5f" stroke-width="1.5" fill="none">
+    <line x1="840" y1="400" x2="840" y2="320"/>
+    <line x1="840" y1="320" x2="900" y2="320"/>
+    <line x1="900" y1="320" x2="900" y2="300" marker-end="url(#inherit)"/>
+  </g>
+
+  <!-- Herencia: Admin -> User -->
+  <g stroke="#1f3a5f" stroke-width="1.5" fill="none">
+    <line x1="1200" y1="400" x2="1200" y2="350"/>
+    <line x1="1200" y1="350" x2="1010" y2="350"/>
+    <line x1="1010" y1="350" x2="1010" y2="300" marker-end="url(#inherit)"/>
+  </g>
+
+  <!-- Admin -> InviteCode (Admin generates / manages InviteCodes) -->
+  <g stroke="#1f3a5f" stroke-width="1.5" fill="none">
+    <path d="M 1080 470 Q 600 350 280 470" marker-start="url(#aggregation)"/>
+  </g>
+  <text x="1060" y="460" font-size="10" fill="#1f3a5f">1</text>
+  <text x="295" y="464" font-size="10" fill="#1f3a5f">0..*</text>
+
+  <!-- Owner 1 — 1..* Kiosk -->
+  <g stroke="#1f3a5f" stroke-width="1.5" fill="none">
+    <line x1="960" y1="500" x2="1440" y2="500" marker-start="url(#aggregation)"/>
+  </g>
+  <text x="975" y="494" font-size="10" fill="#1f3a5f">1</text>
+  <text x="1410" y="494" font-size="10" fill="#1f3a5f">1..*</text>
+
+  <!-- Player 1 — N Visit -->
+  <g stroke="#1f3a5f" stroke-width="1.5" fill="none">
+    <line x1="430" y1="640" x2="200" y2="760"/>
+  </g>
+  <text x="420" y="660" font-size="10" fill="#1f3a5f">1</text>
+  <text x="205" y="755" font-size="10" fill="#1f3a5f">0..*</text>
+
+  <!-- Player 1 — N Review -->
+  <g stroke="#1f3a5f" stroke-width="1.5" fill="none">
+    <line x1="490" y1="640" x2="450" y2="760"/>
+  </g>
+  <text x="488" y="660" font-size="10" fill="#1f3a5f">1</text>
+  <text x="455" y="755" font-size="10" fill="#1f3a5f">0..*</text>
+
+  <!-- Player 1 — N Redemption (línea diagonal larga) -->
+  <g stroke="#1f3a5f" stroke-width="1.5" fill="none">
+    <line x1="610" y1="600" x2="1080" y2="760"/>
+  </g>
+  <text x="610" y="615" font-size="10" fill="#1f3a5f">1</text>
+  <text x="1060" y="752" font-size="10" fill="#1f3a5f">0..*</text>
+
+  <!-- Kiosk 1 — N Visit (curva por arriba) -->
+  <g stroke="#1f3a5f" stroke-width="1.5" fill="none">
+    <path d="M 1440 700 Q 800 720 170 760"/>
+  </g>
+  <text x="1420" y="710" font-size="10" fill="#1f3a5f">1</text>
+  <text x="200" y="755" font-size="10" fill="#1f3a5f">0..*</text>
+
+  <!-- Kiosk 1 — N Review -->
+  <g stroke="#1f3a5f" stroke-width="1.5" fill="none">
+    <path d="M 1440 670 Q 900 740 460 760"/>
+  </g>
+  <text x="1420" y="678" font-size="10" fill="#1f3a5f">1</text>
+  <text x="475" y="755" font-size="10" fill="#1f3a5f">0..*</text>
+
+  <!-- Kiosk 1 — N Promotion -->
+  <g stroke="#1f3a5f" stroke-width="1.5" fill="none">
+    <line x1="1440" y1="640" x2="880" y2="760"/>
+  </g>
+  <text x="1430" y="655" font-size="10" fill="#1f3a5f">1</text>
+  <text x="890" y="755" font-size="10" fill="#1f3a5f">0..*</text>
+
+  <!-- Promotion 1 — N Redemption -->
+  <g stroke="#1f3a5f" stroke-width="1.5" fill="none">
+    <line x1="880" y1="860" x2="960" y2="860"/>
+  </g>
+  <text x="888" y="852" font-size="10" fill="#1f3a5f">1</text>
+  <text x="940" y="852" font-size="10" fill="#1f3a5f">0..*</text>
+
+  <!-- Promotion 1 — 1..* PromotionRule (composición) -->
+  <g stroke="#1f3a5f" stroke-width="1.5" fill="none">
+    <line x1="1200" y1="900" x2="1280" y2="900" marker-start="url(#composition)"/>
+  </g>
+  <text x="1210" y="892" font-size="10" fill="#1f3a5f">1</text>
+  <text x="1255" y="892" font-size="10" fill="#1f3a5f">1..*</text>
+
+  <!-- Review N — N Tag -->
+  <g stroke="#1f3a5f" stroke-width="1.5" fill="none">
+    <line x1="450" y1="980" x2="440" y2="1060"/>
+  </g>
+  <text x="455" y="996" font-size="10" fill="#1f3a5f">0..*</text>
+  <text x="445" y="1055" font-size="10" fill="#1f3a5f">0..*</text>
+
+  <!-- Player joinedVia InviteCode (asociación 1..1) -->
+  <g stroke="#1f3a5f" stroke-width="1.5" fill="none">
+    <line x1="280" y1="540" x2="370" y2="540"/>
+  </g>
+  <text x="290" y="534" font-size="10" fill="#1f3a5f">1</text>
+  <text x="350" y="534" font-size="10" fill="#1f3a5f">0..1</text>
+
+  <!-- ============================================================== -->
+  <!-- LEYENDA (al final, sin pisar las clases)                         -->
+  <!-- ============================================================== -->
+  <g transform="translate(60, 1280)">
+    <rect x="0" y="0" width="1780" height="180" rx="8" fill="#f9fafb" stroke="#e5e7eb"/>
+    <text x="20" y="28" font-size="13" font-weight="700" fill="#1f3a5f">Notación UML</text>
+
+    <!-- Inheritance -->
+    <line x1="40" y1="62" x2="100" y2="62" stroke="#1f3a5f" stroke-width="1.5" marker-end="url(#inherit)"/>
+    <text x="120" y="66" font-size="11" fill="#1f2937">Herencia (triángulo vacío) — la subclase es-un de la clase padre</text>
+
+    <!-- Composition -->
+    <line x1="40" y1="92" x2="100" y2="92" stroke="#1f3a5f" stroke-width="1.5" marker-start="url(#composition)"/>
+    <text x="120" y="96" font-size="11" fill="#1f2937">Composición (rombo lleno) — el contenido no existe sin el contenedor (ej: PromotionRule sin Promotion)</text>
+
+    <!-- Aggregation -->
+    <line x1="40" y1="122" x2="100" y2="122" stroke="#1f3a5f" stroke-width="1.5" marker-start="url(#aggregation)"/>
+    <text x="120" y="126" font-size="11" fill="#1f2937">Agregación (rombo vacío) — el contenido puede existir sin el contenedor (ej: Kiosk si se da de baja al Owner)</text>
+
+    <!-- Asociación -->
+    <line x1="40" y1="152" x2="100" y2="152" stroke="#1f3a5f" stroke-width="1.5"/>
+    <text x="120" y="156" font-size="11" fill="#1f2937">Asociación simple — relación entre dos clases. Multiplicidades: 1 · 0..1 · 1..* · 0..*</text>
+
+    <!-- Roles colors -->
+    <text x="900" y="28" font-size="13" font-weight="700" fill="#1f3a5f">Colores por rol/área</text>
+    <rect x="900" y="50" width="20" height="20" fill="#ea8d1f"/>
+    <text x="930" y="65" font-size="11" fill="#1f2937">Player y entidades del lado consumidor</text>
+    <rect x="900" y="80" width="20" height="20" fill="#0284c7"/>
+    <text x="930" y="95" font-size="11" fill="#1f2937">Owner y entidades del dominio comercial (Promotion, PromotionRule, Redemption)</text>
+    <rect x="900" y="110" width="20" height="20" fill="#16a34a"/>
+    <text x="930" y="125" font-size="11" fill="#1f2937">Admin (gestión de plataforma)</text>
+    <rect x="900" y="140" width="20" height="20" fill="#1f3a5f"/>
+    <text x="930" y="155" font-size="11" fill="#1f2937">Entidades base / compartidas (User, Kiosk, Visit, Review, Tag, InviteCode)</text>
+  </g>
+</svg>
