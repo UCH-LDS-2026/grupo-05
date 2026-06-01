@@ -1,0 +1,95 @@
+// Spot — schema Prisma (MVP slice player)
+// Subconjunto del modelo de dominio (11 clases) enfocado en el lado player:
+// InviteCode, Player, Kiosk, Tag, Visit, Review. El lado owner (Promotion,
+// PromotionRule, Redemption, Owner, Admin) queda fuera de este MVP.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+/// Código de invitación: habilita el alta de un player (acceso por invitación).
+model InviteCode {
+  id        String   @id @default(cuid())
+  code      String   @unique
+  player    Player?
+  createdAt DateTime @default(now())
+}
+
+/// Cliente recurrente de kioscos. Se da de alta canjeando un InviteCode.
+model Player {
+  id           String     @id @default(cuid())
+  name         String
+  inviteCode   InviteCode @relation(fields: [inviteCodeId], references: [id])
+  inviteCodeId String     @unique
+  visits       Visit[]
+  reviews      Review[]
+  createdAt    DateTime   @default(now())
+}
+
+/// Kiosco (local). Agnóstico de marca: brand opcional ("Yes", independiente, etc.).
+model Kiosk {
+  id        String     @id @default(cuid())
+  name      String
+  address   String
+  city      String     @default("Mendoza")
+  brand     String?
+  lat       Float?
+  lng       Float?
+  tags      KioskTag[]
+  visits    Visit[]
+  reviews   Review[]
+  createdAt DateTime   @default(now())
+}
+
+/// Etiqueta de kiosco (24hs, panchos, carga SUBE, etc.).
+model Tag {
+  id     String     @id @default(cuid())
+  name   String     @unique
+  kiosks KioskTag[]
+}
+
+/// Relación M:N Kiosk <-> Tag.
+model KioskTag {
+  kiosk   Kiosk  @relation(fields: [kioskId], references: [id], onDelete: Cascade)
+  kioskId String
+  tag     Tag    @relation(fields: [tagId], references: [id], onDelete: Cascade)
+  tagId   String
+
+  @@id([kioskId, tagId])
+}
+
+/// Visita registrada por un player a un kiosco. Base del motor de promos (frecuencia).
+model Visit {
+  id        String   @id @default(cuid())
+  player    Player   @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  playerId  String
+  kiosk     Kiosk    @relation(fields: [kioskId], references: [id], onDelete: Cascade)
+  kioskId   String
+  createdAt DateTime @default(now())
+
+  @@index([playerId, kioskId])
+}
+
+/// Reseña con puntaje por categorías (1-5). Una por player por kiosco (editable).
+model Review {
+  id          String   @id @default(cuid())
+  player      Player   @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  playerId    String
+  kiosk       Kiosk    @relation(fields: [kioskId], references: [id], onDelete: Cascade)
+  kioskId     String
+  attention   Int // atención
+  variety     Int // variedad
+  cleanliness Int // limpieza
+  prices      Int // precios
+  ambiance    Int // ambiente
+  comment     String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([playerId, kioskId])
+}
