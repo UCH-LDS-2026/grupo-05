@@ -1,0 +1,19 @@
+{
+  "expo": {
+    "name": "Spot",
+    "slug": "spot",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "scheme": "spot",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "web": {
+      "bundler": "metro",
+      "output": "single"
+    },
+    "plugins": ["expo-router"],
+    "experiments": {
+      "typedRoutes": false
+    }
+  }
+}

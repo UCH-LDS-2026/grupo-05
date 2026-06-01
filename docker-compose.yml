@@ -1,0 +1,45 @@
+services:
+  db:
+    image: postgres:16
+    container_name: spot-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: spot
+      POSTGRES_PASSWORD: spot_dev_pw
+      POSTGRES_DB: spot
+    ports:
+      - "5433:5432"
+    volumes:
+      - spot_db_data:/var/lib/postgresql/data
+
+  api:
+    build:
+      context: .
+      dockerfile: src/apps/api/Dockerfile
+    container_name: spot-api
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    environment:
+      - DATABASE_URL=postgresql://spot:spot_dev_pw@db:5432/spot?schema=public
+      - JWT_SECRET=dev-secret-spot-mvp-no-usar-en-prod-1a2b3c4d5e6f7g8h
+      - JWT_EXPIRES_IN=7d
+      - API_PORT=3001
+    depends_on:
+      - db
+
+  app:
+    build:
+      context: .
+      dockerfile: src/apps/app/Dockerfile
+    container_name: spot-app
+    restart: unless-stopped
+    ports:
+      - "8081:8081"
+    environment:
+      - EXPO_PUBLIC_API_URL=http://localhost:3001
+    depends_on:
+      - api
+
+volumes:
+  spot_db_data:
