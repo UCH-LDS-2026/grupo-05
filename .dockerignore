@@ -1,0 +1,15 @@
+# Ignore local dependencies and environments
+node_modules
+**/node_modules
+.git
+.github
+.expo
+.next
+dist
+build
+.env
+**/.env
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*

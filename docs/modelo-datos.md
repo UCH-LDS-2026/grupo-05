@@ -70,17 +70,64 @@ Restricción: `@@unique([playerId, kioskId])`.
 
 ## Relaciones
 
-```
-InviteCode (1) ───── (1) Player
-                          │
-              ┌───────────┴───────────┐
-              │ 1..*                   │ 1..*
-              ▼                        ▼
-            Visit                    Review
-              │ *                      │ *
-              └───────────┬────────────┘
-                          ▼ *
-                        Kiosk ──── (M:N vía KioskTag) ──── Tag
+```mermaid
+erDiagram
+    InviteCode ||--|| Player : "habilita (1:1)"
+    Player ||--o{ Visit : "realiza (1:N)"
+    Player ||--o{ Review : "escribe (1:N)"
+    Kiosk ||--o{ Visit : "recibe (1:N)"
+    Kiosk ||--o{ Review : "recibe (1:N)"
+    Kiosk ||--o{ KioskTag : "tiene (1:N)"
+    Tag ||--o{ KioskTag : "asociada (1:N)"
+
+    InviteCode {
+        string id PK
+        string code "Único"
+        datetime createdAt
+    }
+    Player {
+        string id PK
+        string name
+        string inviteCodeId FK "Único"
+        datetime createdAt
+    }
+    Kiosk {
+        string id PK
+        string name
+        string address
+        string city "Default Mendoza"
+        string brand "Opcional"
+        float lat "Opcional"
+        float lng "Opcional"
+        datetime createdAt
+    }
+    Tag {
+        string id PK
+        string name "Único"
+    }
+    KioskTag {
+        string kioskId PK, FK
+        string tagId PK, FK
+    }
+    Visit {
+        string id PK
+        string playerId FK
+        string kioskId FK
+        datetime createdAt
+    }
+    Review {
+        string id PK
+        string playerId FK
+        string kioskId FK "Único(playerId, kioskId)"
+        int attention
+        int variety
+        int cleanliness
+        int prices
+        int ambiance
+        string comment "Opcional"
+        datetime createdAt
+        datetime updatedAt
+    }
 ```
 
 - Un **InviteCode** habilita exactamente un **Player** (1:1).
