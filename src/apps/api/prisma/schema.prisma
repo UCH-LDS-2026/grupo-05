@@ -1,7 +1,16 @@
-// Spot — schema Prisma (MVP slice player)
-// Subconjunto del modelo de dominio (11 clases) enfocado en el lado player:
-// InviteCode, Player, Kiosk, Tag, Visit, Review. El lado owner (Promotion,
-// PromotionRule, Redemption, Owner, Admin) queda fuera de este MVP.
+// Spot — schema Prisma (modelo de dominio completo, 11 clases)
+//
+// Materializa el modelo del TP2 (diagrama de clases): User (abstracto) →
+// Player / Owner / Admin, más Kiosk, Tag, Visit, Review y el motor de
+// promociones (Promotion, PromotionRule, Redemption).
+//
+// Mapeo de la herencia (User abstracto → Player/Owner/Admin):
+//   table-per-concrete-class. User es abstracto y NO tiene tabla propia; sus
+//   atributos se "empujan" a cada subclase concreta. El discriminador de rol
+//   vive en el JWT (enum Role). Se eligió esta variante porque:
+//     - evita columnas nullable (un Player no tiene email/password; un Owner sí),
+//     - no rompe el slice player ya implementado (Player queda intacto),
+//     - es un mapeo OO→relacional estándar y suficiente para el alcance del TP.
 
 generator client {
   provider = "prisma-client-js"
@@ -12,6 +21,46 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// ─────────────────────────── Enums ───────────────────────────
+
+/// Rol del usuario autenticado. Viaja en el JWT (claim `role`).
+enum Role {
+  PLAYER
+  OWNER
+  ADMIN
+}
+
+/// Estado de validación de un Owner (lo valida un Admin antes de operar).
+enum OwnerStatus {
+  PENDIENTE_VALIDACION
+  VALIDADO
+  RECHAZADO
+}
+
+/// Tipo de regla del motor de promociones. Las reglas se combinan con AND.
+enum PromotionRuleType {
+  FREQUENCY // N visitas en M días
+  AMOUNT // $X gastados en M días
+  PRODUCTS // compró ciertos productos/SKUs
+}
+
+/// Tipo de recompensa de una promoción.
+enum RewardType {
+  FREE_PRODUCT // producto gratis
+  DISCOUNT_PCT // descuento porcentual
+  DISCOUNT_AMOUNT // descuento de monto fijo
+  TWO_FOR_ONE // 2x1
+}
+
+/// Estado de un canje (código corto generado al player).
+enum RedemptionStatus {
+  PENDING // generado, esperando validación en mostrador
+  REDEEMED // validado y consumido por el owner
+  EXPIRED // venció (10 min) sin canjearse
+}
+
+// ─────────────────────── Usuarios y acceso ───────────────────────
+
 /// Código de invitación: habilita el alta de un player (acceso por invitación).
 model InviteCode {
   id        String   @id @default(cuid())
@@ -21,29 +70,60 @@ model InviteCode {
 }
 
 /// Cliente recurrente de kioscos. Se da de alta canjeando un InviteCode.
+/// Subclase concreta de User (auth por invite code, sin email/password).
 model Player {
-  id           String     @id @default(cuid())
+  id           String       @id @default(cuid())
   name         String
-  inviteCode   InviteCode @relation(fields: [inviteCodeId], references: [id])
-  inviteCodeId String     @unique
+  inviteCode   InviteCode   @relation(fields: [inviteCodeId], references: [id])
+  inviteCodeId String       @unique
   visits       Visit[]
   reviews      Review[]
-  createdAt    DateTime   @default(now())
+  redemptions  Redemption[]
+  createdAt    DateTime     @default(now())
 }
 
+/// Dueño/encargado de uno o más kioscos. Subclase concreta de User
+/// (auth por email+password). Debe ser validado por un Admin antes de operar.
+model Owner {
+  id           String      @id @default(cuid())
+  name         String
+  email        String      @unique
+  passwordHash String
+  status       OwnerStatus @default(PENDIENTE_VALIDACION)
+  kiosks       Kiosk[]
+  createdAt    DateTime    @default(now())
+}
+
+/// Administrador de la plataforma. Subclase concreta de User
+/// (auth por email+password). Valida owners, genera invite codes, modera.
+model Admin {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+}
+
+// ─────────────────────────── Catálogo ───────────────────────────
+
 /// Kiosco (local). Agnóstico de marca: brand opcional ("Yes", independiente, etc.).
+/// owner opcional: un kiosco puede estar pre-cargado por la plataforma y luego
+/// ser reclamado/gestionado por un Owner (multiplicidad 1 Owner → N Kiosk).
 model Kiosk {
-  id        String     @id @default(cuid())
-  name      String
-  address   String
-  city      String     @default("Mendoza")
-  brand     String?
-  lat       Float?
-  lng       Float?
-  tags      KioskTag[]
-  visits    Visit[]
-  reviews   Review[]
-  createdAt DateTime   @default(now())
+  id          String      @id @default(cuid())
+  name        String
+  address     String
+  city        String      @default("Mendoza")
+  brand       String?
+  lat         Float?
+  lng         Float?
+  owner       Owner?      @relation(fields: [ownerId], references: [id], onDelete: SetNull)
+  ownerId     String?
+  tags        KioskTag[]
+  visits      Visit[]
+  reviews     Review[]
+  promotions  Promotion[]
+  createdAt   DateTime    @default(now())
 }
 
 /// Etiqueta de kiosco (24hs, panchos, carga SUBE, etc.).
@@ -63,7 +143,9 @@ model KioskTag {
   @@id([kioskId, tagId])
 }
 
-/// Visita registrada por un player a un kiosco. Base del motor de promos (frecuencia).
+// ─────────────────────── Actividad del player ───────────────────────
+
+/// Visita registrada por un player a un kiosco. Insumo del motor de promos (frecuencia).
 model Visit {
   id        String   @id @default(cuid())
   player    Player   @relation(fields: [playerId], references: [id], onDelete: Cascade)
@@ -92,4 +174,79 @@ model Review {
   updatedAt   DateTime @updatedAt
 
   @@unique([playerId, kioskId])
+}
+
+// ─────────────────────── Motor de promociones ───────────────────────
+
+/// Promoción definida por un Owner para un kiosco. Combina reglas (AND),
+/// una audiencia opcional, una recompensa y topes de canje (caps).
+/// Composición: sus PromotionRule no existen sin la promoción.
+model Promotion {
+  id          String   @id @default(cuid())
+  kiosk       Kiosk    @relation(fields: [kioskId], references: [id], onDelete: Cascade)
+  kioskId     String
+  title       String
+  description String?
+  active      Boolean  @default(true)
+
+  // Recompensa
+  rewardType    RewardType
+  rewardValue   Float? // % o $ según rewardType (null para FREE_PRODUCT / TWO_FOR_ONE)
+  rewardProduct String? // producto gratis / producto del 2x1
+
+  // Audiencia (opcional): día de semana (0=Dom..6=Sáb) y franja horaria
+  audienceDays     Int[] // vacío = todos los días
+  audienceFromHour Int? // 0-23
+  audienceToHour   Int? // 0-23
+
+  // Caps (topes de canje)
+  capPerPlayer Int? // máx canjes por player
+  capPerPeriod Int? // máx canjes por período
+  capTotal     Int? // máx canjes en total
+  periodDays   Int? // ventana del cap por período (en días)
+
+  // Vigencia
+  startsAt DateTime?
+  endsAt   DateTime?
+
+  rules       PromotionRule[]
+  redemptions Redemption[]
+  createdAt   DateTime        @default(now())
+
+  @@index([kioskId, active])
+}
+
+/// Regla individual del motor. Los parámetros usados dependen de `type`.
+model PromotionRule {
+  id          String            @id @default(cuid())
+  promotion   Promotion         @relation(fields: [promotionId], references: [id], onDelete: Cascade)
+  promotionId String
+  type        PromotionRuleType
+
+  // FREQUENCY / AMOUNT: ventana temporal
+  windowDays Int?
+  // FREQUENCY: cantidad mínima de visitas
+  minVisits  Int?
+  // AMOUNT: monto mínimo gastado
+  minAmount  Float?
+  // PRODUCTS: lista de productos/SKUs que deben haberse comprado
+  products   String[]
+}
+
+/// Canje: instancia de una promo gatillada para un player. Lleva un código
+/// corto que el owner valida en el mostrador (expira a los 10 min).
+model Redemption {
+  id          String           @id @default(cuid())
+  promotion   Promotion        @relation(fields: [promotionId], references: [id], onDelete: Cascade)
+  promotionId String
+  player      Player           @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  playerId    String
+  code        String           @unique // código corto alfanumérico (6 chars)
+  status      RedemptionStatus @default(PENDING)
+  expiresAt   DateTime
+  redeemedAt  DateTime?
+  createdAt   DateTime         @default(now())
+
+  @@index([playerId, status])
+  @@index([promotionId, status])
 }

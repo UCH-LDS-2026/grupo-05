@@ -1,5 +1,5 @@
 // Persistencia de sesión. En web usa localStorage; en otros entornos cae a
-// memoria (suficiente para el MVP, cuyo objetivo de demo es la web).
+// memoria.
 
 export type Player = { id: string; name: string };
 

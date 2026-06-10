@@ -1,22 +1,31 @@
+# Spot API — imagen de producción (NestJS + Prisma)
 FROM node:20-slim
 
-RUN apt-get update -y && apt-get install -y openssl ca-certificates procps && rm -rf /var/lib/apt/lists/*
+# openssl/ca-certificates: requeridos por los engines de Prisma
+RUN apt-get update -y && apt-get install -y openssl ca-certificates && rm -rf /var/lib/apt/lists/*
 
 RUN npm install -g pnpm
 
 WORKDIR /app
 
+# Manifests del monorepo + código del API
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY src/apps/api ./src/apps/api
 
-# Desactivar restricción de antigüedad de pnpm en el contenedor
+# pnpm en CI/contenedor: sin restricción de antigüedad de paquetes
 RUN pnpm config set minimum-release-age 0 && pnpm config set fetch-timeout 300000
 
 RUN pnpm install --frozen-lockfile
 
-# Generar cliente de Prisma
-RUN cd src/apps/api && pnpm prisma:generate
+# Generar cliente de Prisma y compilar a dist/
+RUN cd src/apps/api \
+  && pnpm exec prisma generate \
+  && pnpm exec nest build
+
+COPY src/apps/api/docker-entrypoint.sh /usr/local/bin/spot-entrypoint.sh
+RUN chmod +x /usr/local/bin/spot-entrypoint.sh
 
 EXPOSE 3001
 
-CMD ["pnpm", "--dir", "src/apps/api", "start:dev"]
+# El entrypoint aplica migraciones, hace seed la 1ª vez y arranca el server.
+ENTRYPOINT ["spot-entrypoint.sh"]
