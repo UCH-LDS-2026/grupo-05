@@ -3,7 +3,7 @@
 # Spot
 ## Grupo N° 5
 
-Plataforma two-sided para descubrir, reseñar y fidelizar clientes en kioscos de barrio. Combina una app móvil para clientes (players) con un panel web para dueños de kiosco (owners) y un motor de promociones por reglas (frecuencia, monto, productos).
+Plataforma **two-sided** para descubrir, reseñar y fidelizar clientes en kioscos de barrio. Combina una app para clientes (**players**) con un panel para dueños de kiosco (**owners**) y un motor de promociones por reglas (frecuencia, monto, productos), más un rol de **admin** para la plataforma.
 
 ## Integrantes
 
@@ -12,120 +12,93 @@ Plataforma two-sided para descubrir, reseñar y fidelizar clientes en kioscos de
 - Matías Aguiar — [@matiasaguiar-dotcom](https://github.com/matiasaguiar-dotcom)
 - Joel Aisama — [@aisamajoel-tech](https://github.com/aisamajoel-tech)
 
+## 🚀 Probarlo (Docker, un solo comando)
+
+Con **Docker** instalado y corriendo, desde la raíz del repo:
+
+```bash
+docker compose up --build
+```
+
+Eso levanta la base, el backend y el frontend, **aplica las migraciones y carga datos de demo automáticamente**. Cuando termine, abrí:
+
+| Servicio | URL |
+|---|---|
+| App (web) | http://localhost:8081 |
+| API | http://localhost:3001 |
+
+Probá el login con el código **`SPOT2026`** (player). Credenciales y guía completa (verificada paso a paso) en **[DEPLOY.md](DEPLOY.md)**.
+
 ## Problema que resuelve
 
-Los clientes recurrentes de los kioscos de barrio en Mendoza no tienen forma centralizada de registrar sus visitas, comparar reseñas, descubrir locales nuevos ni recibir un beneficio por su fidelidad. Del otro lado, los dueños de kiosco no tienen forma de identificar a esos clientes recurrentes, lanzarles promos segmentadas ni medir su impacto. Spot conecta ambos lados en una sola plataforma. El piloto del MVP arranca con kioscos Yes Mendoza, pero el sistema es agnóstico de marca y escala a cualquier cadena o local independiente.
+Los clientes recurrentes de kioscos de barrio no tienen forma centralizada de registrar visitas, comparar reseñas, descubrir locales ni recibir un beneficio por su fidelidad. Del otro lado, los dueños no pueden identificar a esos clientes, lanzarles promos segmentadas ni medir su impacto. Spot conecta ambos lados. El sistema es **agnóstico de marca**: la demo usa kioscos de Mendoza, pero escala a cualquier cadena o local independiente.
 
-## Usuarios
+## Roles
 
-Sistema multi-rol two-sided:
-- **Players** — clientes recurrentes (acceso por invite code)
-- **Owners** — dueños/encargados de kiosco (registro abierto + validación)
-- **Admins** — equipo de plataforma (catálogo, validaciones, moderación)
+- **Players** — clientes recurrentes (acceso por *invite code*).
+- **Owners** — dueños/encargados de kiosco (registro + validación de un admin).
+- **Admins** — equipo de plataforma (validan owners, generan invite codes, moderan).
 
-## Funcionalidades principales
+## Funcionalidades
 
-- Mapa interactivo de kioscos con pins visitado/no visitado
-- Reseñas con puntaje por categorías, tags y fotos
-- Stats personales, leaderboard y timeline grupal
+- Mapa interactivo de kioscos con pins visitado / no visitado
+- Reseñas con puntaje por 5 categorías, tags y fotos
+- Progreso personal, leaderboard y timeline grupal
 - Panel del owner con métricas de su kiosco
 - Motor de promociones por reglas (frecuencia, monto, productos)
-- Canje de promos con código corto + QR, validado por el owner
+- Canje de promos con código corto (+ QR opcional), validado por el owner
 
-Detalle completo en [`trabajos-practicos/tp1/definicion-proyecto.md`](trabajos-practicos/tp1/definicion-proyecto.md).
+Detalle en [`trabajos-practicos/tp1/`](trabajos-practicos/tp1/).
 
-## Stack tecnológico
+## Stack
 
 | Capa | Tecnología |
 |---|---|
-| Frontend mobile (player) | Expo (React Native) + React Native Web |
-| Frontend web (owner / admin) | Next.js (React) |
+| Frontend (player) | Expo (React Native) + React Native Web |
+| Frontend (owner / admin) | Next.js (React) |
 | Backend | NestJS (TypeScript) |
 | Base de datos | PostgreSQL + Prisma ORM |
-| Almacenamiento de archivos | Cloudflare R2 (S3 compatible) |
-| Auth | JWT + invite codes (player) / registro+validación (owner) |
-| Deploy | Docker + Easypanel en VPS |
-| CI | GitHub Actions |
+| Archivos | Cloudflare R2 (S3 compatible) |
+| Auth | JWT con rol · invite code (player) / email+password (owner, admin) |
+| Deploy | Docker (local) + Easypanel en VPS |
+| CI | GitHub Actions (desde TP4) |
 
-Justificación detallada por capa en [`trabajos-practicos/tp2/justificacion-stack.md`](trabajos-practicos/tp2/justificacion-stack.md).
+Justificación por capa en [`trabajos-practicos/tp2/justificacion-stack.md`](trabajos-practicos/tp2/justificacion-stack.md).
 
-## Setup del entorno
+## Estado
 
-Requisitos previos en cada equipo:
+| Parte | Estado |
+|---|---|
+| Modelo de dominio completo (11 clases) + migraciones | ✅ |
+| Auth con roles (player / owner / admin) | ✅ |
+| Flujo player (login → kioscos → visita → reseña) | ✅ |
+| Deploy con Docker (un comando) | ✅ |
+| Onboarding owner · motor de promos · canje | 🚧 en desarrollo |
+| Backoffice admin · tests + CI | ⏳ pendiente |
 
-| Tool | Versión mínima | Verificar con |
-|---|---|---|
-| Node.js | 20.x LTS | `node -v` |
-| pnpm | 9.x | `pnpm -v` |
-| Git | 2.40+ | `git --version` |
-| PostgreSQL | 16.x (local o vía Docker) | `psql --version` |
-| Docker + Docker Compose | 24+ / v2 | `docker --version` |
-| Expo CLI | última estable | `npx expo --version` |
-
-### Clonar y arrancar
-
-```bash
-# 1. Clonar el repo
-git clone https://github.com/UCH-LDS-2026/grupo-05.git
-cd grupo-05
-
-# 2. Instalar dependencias (cuando exista código en TP3+)
-pnpm install
-
-# 3. Variables de entorno
-cp .env.example .env
-# Editar .env con credenciales locales
-
-# 4. Levantar la base de datos local (Docker)
-docker compose up -d db
-
-# 5. Aplicar migraciones (cuando exista schema)
-pnpm prisma migrate dev
-
-# 6. Arrancar backend (puerto 3001)
-pnpm --filter api dev
-
-# 7. Arrancar frontend mobile (Expo)
-pnpm --filter app start
-
-# 8. Arrancar panel web owner (Next.js, puerto 3000)
-pnpm --filter owner dev
-```
-
-> **Nota**: el código vivo del proyecto se incorpora a partir del TP3 (Diseño del Sistema). Esta guía describe el setup objetivo del entorno; en TP2 se valida la instalación de las herramientas en cada equipo del grupo (capturas en [`trabajos-practicos/tp2/entorno-instalado.md`](trabajos-practicos/tp2/entorno-instalado.md)).
-
-## Estrategia de ramas
-
-El equipo trabaja con **GitHub Flow simple**: `main` protegida + feature branches por integrante/tarea + PR con review obligatorio antes de mergear. Detalle en [`docs/estrategia-ramas.md`](docs/estrategia-ramas.md).
-
-## Estructura del repositorio
+## Estructura del repo
 
 ```
 grupo-05/
-├── docs/                          Documentación viva del proyecto
+├── docker-compose.yml          Stack completo (db + api + app)
+├── DEPLOY.md                   Guía de deploy con Docker (verificada)
+├── pnpm-workspace.yaml         Monorepo pnpm → src/apps/*
+├── docs/                       Documentación viva
 │   ├── arquitectura.md
 │   ├── modelo-datos.md
-│   ├── product-discovery.md
-│   ├── estrategia-ramas.md
-│   ├── casos-de-uso.svg
-│   └── diagrama-clases.svg
-├── src/                           Código fuente (a partir de TP3)
-├── tests/                         Tests (a partir de TP4)
-├── trabajos-practicos/            Entregables por TP
-│   ├── tp1/  → Definición del proyecto
-│   ├── tp2/  → Setup técnico (este TP)
-│   ├── tp3/  → Diseño del sistema
-│   ├── tp4/  → Calidad y testing
-│   └── tp5/  → Proyecto final
-└── README.md
+│   ├── contratos.md            Contratos compartidos entre features
+│   └── estrategia-ramas.md
+├── src/apps/
+│   ├── api/                    Backend NestJS + Prisma
+│   │   ├── prisma/             schema.prisma + migrations + seed
+│   │   └── src/                auth, kiosks, visits, reviews, ...
+│   └── app/                    Frontend Expo (web)
+├── tests/                      Tests (desde TP4)
+└── trabajos-practicos/         Entregables por TP (tp1..tp5)
 ```
 
-## Cronograma
+## Cómo trabajamos
 
-| TP | Entregable | Estado |
-|---|---|---|
-| TP1 | Definición del proyecto | ✅ Entregado |
-| TP2 | Setup técnico (este) | 🚧 En curso |
-| TP3 | Diseño del sistema (arquitectura + datos) | ⏳ Pendiente |
-| TP4 | Calidad y testing | ⏳ Pendiente |
-| TP5 | Proyecto final (sistema funcional + demo) | ⏳ Pendiente |
+`main` está **protegida**: nada de commits directos. Cada feature/fix va en su rama, se abre un **Pull Request** contra `main` con **1 review** de otro integrante y se mergea con **squash**. Detalle en [`docs/estrategia-ramas.md`](docs/estrategia-ramas.md).
+
+Para correr en modo desarrollo (sin Docker, con hot-reload) ver la sección *Desarrollo local* de [DEPLOY.md](DEPLOY.md).

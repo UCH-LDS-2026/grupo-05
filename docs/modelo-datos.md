@@ -2,141 +2,150 @@
 
 > Implementado con **Prisma** sobre PostgreSQL. Schema en
 > [`src/apps/api/prisma/schema.prisma`](../src/apps/api/prisma/schema.prisma).
-> Este MVP cubre el subconjunto del dominio necesario para el lado **player**.
+> Cubre el **modelo de dominio completo (11 clases)** del TP2: usuarios y acceso,
+> catálogo, actividad del player y el motor de promociones.
+
+## Mapeo de la herencia (User → Player / Owner / Admin)
+
+El diagrama de clases define `User` como **clase abstracta** con tres subclases
+concretas. Prisma no soporta herencia nativa; se eligió el mapeo
+**table-per-concrete-class**: `User` no tiene tabla propia y sus atributos se
+"empujan" a cada subclase. El discriminador de rol viaja en el JWT (enum `Role`).
+
+Motivo de la decisión:
+- **Evita nullables**: un `Player` se autentica por invite code (sin email/password),
+  un `Owner`/`Admin` por email+password. Cada tabla guarda solo lo que le aplica.
+- **No rompe el flujo del player** ya implementado (la tabla `Player` queda intacta).
+- Es un mapeo OO→relacional estándar y suficiente para el alcance del TP.
+
+## Enums
+
+| Enum | Valores |
+|---|---|
+| `Role` | PLAYER · OWNER · ADMIN |
+| `OwnerStatus` | PENDIENTE_VALIDACION · VALIDADO · RECHAZADO |
+| `PromotionRuleType` | FREQUENCY · AMOUNT · PRODUCTS |
+| `RewardType` | FREE_PRODUCT · DISCOUNT_PCT · DISCOUNT_AMOUNT · TWO_FOR_ONE |
+| `RedemptionStatus` | PENDING · REDEEMED · EXPIRED |
 
 ## Entidades
 
-### InviteCode
-Código que habilita el alta de un player (acceso por invitación).
+### Usuarios y acceso
 
-| Campo | Tipo | Notas |
-|---|---|---|
-| id | String (cuid) | PK |
-| code | String | único |
-| createdAt | DateTime | |
+**InviteCode** — código que habilita el alta de un player (acceso por invitación).
+`id` (cuid, PK) · `code` (único) · `createdAt`.
 
-### Player
-Cliente recurrente de kioscos. Se da de alta canjeando un `InviteCode`.
+**Player** — cliente recurrente. Subclase de User (auth por invite code).
+`id` (PK) · `name` · `inviteCodeId` (FK → InviteCode, único 1:1) · `createdAt`.
 
-| Campo | Tipo | Notas |
-|---|---|---|
-| id | String (cuid) | PK |
-| name | String | |
-| inviteCodeId | String | FK → InviteCode (único: 1 código ↔ 1 player) |
-| createdAt | DateTime | |
+**Owner** — dueño de uno o más kioscos. Subclase de User (auth email+password).
+`id` (PK) · `name` · `email` (único) · `passwordHash` · `status` (OwnerStatus,
+default PENDIENTE_VALIDACION) · `createdAt`.
 
-### Kiosk
-Local. Agnóstico de marca (`brand` opcional).
+**Admin** — administrador de la plataforma. Subclase de User (auth email+password).
+`id` (PK) · `name` · `email` (único) · `passwordHash` · `createdAt`.
 
-| Campo | Tipo | Notas |
-|---|---|---|
-| id | String (cuid) | PK |
-| name | String | |
-| address | String | |
-| city | String | default "Mendoza" |
-| brand | String? | "Yes", null si es independiente |
-| lat, lng | Float? | ubicación |
+### Catálogo
 
-### Tag
-Etiqueta de kiosco (24hs, Panchos, Carga SUBE, etc.). Relación M:N con Kiosk vía `KioskTag`.
+**Kiosk** — local, agnóstico de marca. `id` (PK) · `name` · `address` · `city`
+(default "Mendoza") · `brand?` · `lat?` · `lng?` · `ownerId?` (FK → Owner,
+opcional: un kiosco puede estar pre-cargado y luego ser reclamado) · `createdAt`.
 
-### Visit
-Visita de un player a un kiosco. Base del futuro motor de promos (frecuencia).
+**Tag** — etiqueta (24hs, Panchos, etc.). M:N con Kiosk vía **KioskTag**.
 
-| Campo | Tipo | Notas |
-|---|---|---|
-| id | String (cuid) | PK |
-| playerId | String | FK → Player |
-| kioskId | String | FK → Kiosk |
-| createdAt | DateTime | |
+### Actividad del player
 
-### Review
-Reseña con puntaje por categorías (1-5). **Una por player por kiosco** (editable).
+**Visit** — visita de un player a un kiosco (insumo del motor, frecuencia).
+`id` · `playerId` (FK) · `kioskId` (FK) · `createdAt`.
 
-| Campo | Tipo | Notas |
-|---|---|---|
-| id | String (cuid) | PK |
-| playerId | String | FK → Player |
-| kioskId | String | FK → Kiosk |
-| attention | Int | atención (1-5) |
-| variety | Int | variedad (1-5) |
-| cleanliness | Int | limpieza (1-5) |
-| prices | Int | precios (1-5) |
-| ambiance | Int | ambiente (1-5) |
-| comment | String? | opcional |
-| createdAt / updatedAt | DateTime | |
+**Review** — reseña con puntaje por 5 categorías (1-5). **Una por player por
+kiosco** (editable, `@@unique([playerId, kioskId])`). `attention` · `variety` ·
+`cleanliness` · `prices` · `ambiance` · `comment?` · `createdAt`/`updatedAt`.
 
-Restricción: `@@unique([playerId, kioskId])`.
+### Motor de promociones
+
+**Promotion** — promo de un kiosco. `id` · `kioskId` (FK) · `title` ·
+`description?` · `active` · recompensa (`rewardType`, `rewardValue?`,
+`rewardProduct?`) · audiencia opcional (`audienceDays[]`, `audienceFromHour?`,
+`audienceToHour?`) · caps (`capPerPlayer?`, `capPerPeriod?`, `capTotal?`,
+`periodDays?`) · vigencia (`startsAt?`, `endsAt?`).
+
+**PromotionRule** — regla del motor (composición con Promotion; se combinan con
+AND). `id` · `promotionId` (FK) · `type` (PromotionRuleType) · params según tipo:
+`windowDays?`, `minVisits?` (FREQUENCY), `minAmount?` (AMOUNT), `products[]`
+(PRODUCTS).
+
+**Redemption** — canje gatillado para un player. `id` · `promotionId` (FK) ·
+`playerId` (FK) · `code` (único, 6 chars) · `status` (RedemptionStatus) ·
+`expiresAt` · `redeemedAt?` · `createdAt`.
 
 ## Relaciones
 
 ```mermaid
 erDiagram
     InviteCode ||--|| Player : "habilita (1:1)"
-    Player ||--o{ Visit : "realiza (1:N)"
-    Player ||--o{ Review : "escribe (1:N)"
-    Kiosk ||--o{ Visit : "recibe (1:N)"
-    Kiosk ||--o{ Review : "recibe (1:N)"
-    Kiosk ||--o{ KioskTag : "tiene (1:N)"
-    Tag ||--o{ KioskTag : "asociada (1:N)"
+    Owner ||--o{ Kiosk : "gestiona (1:N, opcional)"
+    Player ||--o{ Visit : "realiza"
+    Player ||--o{ Review : "escribe"
+    Player ||--o{ Redemption : "canjea"
+    Kiosk ||--o{ Visit : "recibe"
+    Kiosk ||--o{ Review : "recibe"
+    Kiosk ||--o{ KioskTag : "tiene"
+    Kiosk ||--o{ Promotion : "ofrece"
+    Tag ||--o{ KioskTag : "asociada"
+    Promotion ||--o{ PromotionRule : "compone (1:N)"
+    Promotion ||--o{ Redemption : "genera"
 
-    InviteCode {
-        string id PK
-        string code "Único"
-        datetime createdAt
-    }
     Player {
         string id PK
         string name
         string inviteCodeId FK "Único"
-        datetime createdAt
+    }
+    Owner {
+        string id PK
+        string name
+        string email "Único"
+        string passwordHash
+        enum status "OwnerStatus"
+    }
+    Admin {
+        string id PK
+        string email "Único"
+        string passwordHash
     }
     Kiosk {
         string id PK
         string name
-        string address
-        string city "Default Mendoza"
-        string brand "Opcional"
-        float lat "Opcional"
-        float lng "Opcional"
-        datetime createdAt
+        string ownerId FK "Opcional"
+        float lat
+        float lng
     }
-    Tag {
+    Promotion {
         string id PK
-        string name "Único"
-    }
-    KioskTag {
-        string kioskId PK, FK
-        string tagId PK, FK
-    }
-    Visit {
-        string id PK
-        string playerId FK
         string kioskId FK
-        datetime createdAt
+        enum rewardType
+        float rewardValue "Opcional"
+        bool active
     }
-    Review {
+    PromotionRule {
         string id PK
+        string promotionId FK
+        enum type "PromotionRuleType"
+    }
+    Redemption {
+        string id PK
+        string promotionId FK
         string playerId FK
-        string kioskId FK "Único(playerId, kioskId)"
-        int attention
-        int variety
-        int cleanliness
-        int prices
-        int ambiance
-        string comment "Opcional"
-        datetime createdAt
-        datetime updatedAt
+        string code "Único"
+        enum status "RedemptionStatus"
+        datetime expiresAt
     }
 ```
 
-- Un **InviteCode** habilita exactamente un **Player** (1:1).
-- Un **Player** tiene muchas **Visit** y muchas **Review**.
-- Un **Kiosk** acumula muchas **Visit** y **Review**, y tiene muchos **Tag** (M:N).
-- Una **Review** pertenece a un Player y un Kiosk; es única por ese par.
+- Un **Owner** gestiona 0..N **Kiosk** (1 owner → N kioscos; un kiosco puede no
+  tener owner aún).
+- Una **Promotion** se compone de 1..N **PromotionRule** (AND) y genera **Redemption**.
+- Una **Redemption** vincula una Promotion con el Player que la canjea.
 
-## Fuera de alcance del MVP (modelado para etapas futuras)
-
-`Owner`, `Admin`, `Promotion`, `PromotionRule`, `Redemption` — el lado B2B y el
-motor de promociones por reglas. Ver el diagrama de clases completo en
-[`diagrama-clases.svg`](./diagrama-clases.svg).
+> El diagrama de clases UML completo está en
+> [`diagrama-clases.svg`](./diagrama-clases.svg).

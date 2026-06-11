@@ -18,6 +18,10 @@ export class JwtAuthGuard implements CanActivate {
     }
     try {
       const payload = this.jwt.verify(header.slice(7));
+      // `req.user` es el sujeto autenticado con su rol (player/owner/admin).
+      req.user = { id: payload.sub, name: payload.name, role: payload.role };
+      // `req.player` se mantiene por compatibilidad con los endpoints del player:
+      // para un PLAYER, `sub` es el id del Player.
       req.player = { id: payload.sub, name: payload.name };
       return true;
     } catch {

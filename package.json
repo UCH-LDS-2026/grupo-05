@@ -2,10 +2,13 @@
   "name": "spot",
   "version": "0.1.0",
   "private": true,
-  "description": "Spot — plataforma two-sided para kioscos. MVP slice player (UCH Lab. Desarrollo de Software, Grupo 5).",
+  "description": "Spot — plataforma two-sided para kioscos (UCH Lab. Desarrollo de Software, Grupo 5).",
   "scripts": {
-    "db:up": "docker-compose up -d db",
-    "db:down": "docker-compose down",
+    "up": "docker compose up --build -d",
+    "down": "docker compose down",
+    "reset": "docker compose down -v",
+    "logs": "docker compose logs -f",
+    "db:up": "docker compose up -d db",
     "api:dev": "pnpm --filter @spot/api start:dev",
     "app:web": "pnpm --filter @spot/app web",
     "seed": "pnpm --filter @spot/api seed"
