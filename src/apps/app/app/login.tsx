@@ -90,6 +90,14 @@ export default function Login() {
         <Text style={styles.hint}>
           Códigos de demo: SPOT2026 · YESMZA
         </Text>
+
+        <View style={{ marginTop: space.xl, alignItems: 'center' }}>
+          <Pressable onPress={() => router.push('/owner/login')}>
+            <Text style={{ color: colors.primary, fontWeight: '600' }}>
+              ¿Sos dueño de un kiosco? Ingresá acá
+            </Text>
+          </Pressable>
+        </View>
       </View>
     </KeyboardAvoidingView>
   );
