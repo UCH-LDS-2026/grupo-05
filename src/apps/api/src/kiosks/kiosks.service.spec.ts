@@ -15,11 +15,16 @@ const mockPrisma = {
   },
 };
 
+// ---------- mock de PromotionsService (motor de promociones) ----------
+const mockPromotions = {
+  evaluatePromotionsForPlayer: jest.fn().mockResolvedValue([]),
+};
+
 describe('KiosksService', () => {
   let service: KiosksService;
 
   beforeEach(() => {
-    service = new KiosksService(mockPrisma as any);
+    service = new KiosksService(mockPrisma as any, mockPromotions as any);
     jest.clearAllMocks();
   });
 

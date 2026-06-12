@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import { RatingPicker } from '../../components/RatingPicker';
 import { Stars } from '../../components/Stars';
-import { api, KioskDetail, PromotionItem, ReviewInput } from '../../lib/api';
+import { api, KioskDetail, ActivePromotion, ReviewInput } from '../../lib/api';
 import { colors, radius, space } from '../../theme';
 
 const CATS: { key: keyof Omit<ReviewInput, 'comment'>; label: string }[] = [
@@ -102,12 +102,25 @@ export default function KioskDetailScreen() {
     }
   }
 
-  function onRedeem(promo: PromotionItem) {
+  function onRedeem(promo: ActivePromotion) {
     if (!id) return;
     router.push({
       pathname: '/kiosks/redeem',
-      params: { kioskId: id, promotionId: promo.id },
+      params: { kioskId: id, promotionId: promo.promotionId },
     });
+  }
+
+  // Pista para el player que todavía no califica (progreso de la regla de frecuencia).
+  function promoHint(promo: ActivePromotion): string {
+    const freq = promo.ruleProgress?.find((r) => r.type === 'FREQUENCY');
+    if (
+      freq &&
+      typeof freq.current === 'number' &&
+      typeof freq.required === 'number'
+    ) {
+      return `Visitas: ${freq.current}/${freq.required}`;
+    }
+    return 'Todavía no calificás para esta promo';
   }
 
   if (loading || !kiosk) {
@@ -180,25 +193,31 @@ export default function KioskDetailScreen() {
         </Pressable>
       </View>
 
-      {/* Promos elegibles */}
+      {/* Promociones del kiosco (motor de promos) */}
       {kiosk.promotions.length > 0 && (
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>🎁 Tus promociones</Text>
           {kiosk.promotions.map((p) => (
-            <View key={p.id} style={styles.promoRow}>
+            <View key={p.promotionId} style={styles.promoRow}>
               <View style={styles.promoInfo}>
                 <Text style={styles.promoTitle}>{p.title}</Text>
                 {p.description ? (
                   <Text style={styles.promoDesc}>{p.description}</Text>
                 ) : null}
-                <View style={styles.eligibleBadge}>
-                  <Ionicons name="checkmark-circle" size={13} color={colors.success} />
-                  <Text style={styles.eligibleText}>Eligible</Text>
-                </View>
+                {p.eligible ? (
+                  <View style={styles.eligibleBadge}>
+                    <Ionicons name="checkmark-circle" size={13} color={colors.success} />
+                    <Text style={styles.eligibleText}>Elegible</Text>
+                  </View>
+                ) : (
+                  <Text style={styles.promoDesc}>{promoHint(p)}</Text>
+                )}
               </View>
-              <Pressable style={styles.redeemBtn} onPress={() => onRedeem(p)}>
-                <Text style={styles.redeemBtnText}>Canjear</Text>
-              </Pressable>
+              {p.eligible && (
+                <Pressable style={styles.redeemBtn} onPress={() => onRedeem(p)}>
+                  <Text style={styles.redeemBtnText}>Canjear</Text>
+                </Pressable>
+              )}
             </View>
           ))}
         </View>
