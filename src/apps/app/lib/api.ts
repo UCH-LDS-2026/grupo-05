@@ -46,12 +46,22 @@ export type ReviewItem = {
   createdAt: string;
 };
 
-export type PromotionItem = {
-  id: string;
+// Promo evaluada por el motor para un player: incluye estado de elegibilidad
+// y el progreso por regla (para guiar al usuario si todavía no califica).
+export type ActivePromotion = {
+  promotionId: string;
   title: string;
   description: string | null;
-  minVisits: number;
+  rewardType: 'FREE_PRODUCT' | 'DISCOUNT_PCT' | 'DISCOUNT_AMOUNT' | 'TWO_FOR_ONE';
+  rewardValue: number | null;
+  rewardProduct: string | null;
   eligible: boolean;
+  ruleProgress?: {
+    type: 'FREQUENCY' | 'AMOUNT' | 'PRODUCTS';
+    current: number | string[];
+    required: number | string[];
+    windowDays?: number;
+  }[];
 };
 
 export type RedemptionStart = {
@@ -70,7 +80,7 @@ export type RedemptionStart = {
 export type KioskDetail = KioskListItem & {
   myVisits: number;
   myReview: (ReviewItem & { playerId: string }) | null;
-  promotions: PromotionItem[];
+  promotions: ActivePromotion[];
   reviews: ReviewItem[];
 };
 

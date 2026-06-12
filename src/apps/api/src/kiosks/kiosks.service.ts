@@ -1,28 +1,19 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { Review } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
+import { PromotionsService } from '../promotions/promotions.service';
 
 type RatingCats = Pick<
   Review,
   'attention' | 'variety' | 'cleanliness' | 'prices' | 'ambiance'
 >;
 
-/**
- * Visitas mínimas que exige una promo, derivadas de sus reglas de FRECUENCIA.
- * Las visitas viven en una `PromotionRule` de tipo FREQUENCY (no en la promo);
- * el resto del motor (monto, productos, audiencia) llega con feature/motor-promociones.
- */
-function requiredVisits(
-  rules: { type: string; minVisits: number | null }[],
-): number {
-  return rules
-    .filter((r) => r.type === 'FREQUENCY' && r.minVisits != null)
-    .reduce((max, r) => Math.max(max, r.minVisits ?? 0), 0);
-}
-
 @Injectable()
 export class KiosksService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly promotions: PromotionsService,
+  ) {}
 
   /** Promedio general (1-5) del puntaje por categorías. Null si no hay reseñas. */
   private overall(reviews: RatingCats[]): number | null {
@@ -78,11 +69,6 @@ export class KiosksService {
           orderBy: { createdAt: 'desc' },
           include: { player: { select: { name: true } } },
         },
-        promotions: {
-          where: { active: true },
-          orderBy: { createdAt: 'asc' },
-          include: { rules: true },
-        },
         _count: { select: { visits: true } },
       },
     });
@@ -95,17 +81,13 @@ export class KiosksService {
       where: { playerId_kioskId: { playerId, kioskId: id } },
     });
 
-    // Promos para las que el player ya califica
-    const promotions = k.promotions
-      .map((p) => ({ promo: p, minVisits: requiredVisits(p.rules) }))
-      .filter(({ minVisits }) => myVisits >= minVisits)
-      .map(({ promo, minVisits }) => ({
-        id: promo.id,
-        title: promo.title,
-        description: promo.description,
-        minVisits,
-        eligible: true,
-      }));
+    // Motor de promociones: evalúa todas las reglas (frecuencia, monto,
+    // productos, audiencia, caps) y devuelve las promos activas con su estado
+    // de elegibilidad para este player.
+    const promotions = await this.promotions.evaluatePromotionsForPlayer(
+      id,
+      playerId,
+    );
 
     return {
       id: k.id,
