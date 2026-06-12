@@ -7,6 +7,19 @@ type RatingCats = Pick<
   'attention' | 'variety' | 'cleanliness' | 'prices' | 'ambiance'
 >;
 
+/**
+ * Visitas mínimas que exige una promo, derivadas de sus reglas de FRECUENCIA.
+ * Las visitas viven en una `PromotionRule` de tipo FREQUENCY (no en la promo);
+ * el resto del motor (monto, productos, audiencia) llega con feature/motor-promociones.
+ */
+function requiredVisits(
+  rules: { type: string; minVisits: number | null }[],
+): number {
+  return rules
+    .filter((r) => r.type === 'FREQUENCY' && r.minVisits != null)
+    .reduce((max, r) => Math.max(max, r.minVisits ?? 0), 0);
+}
+
 @Injectable()
 export class KiosksService {
   constructor(private readonly prisma: PrismaService) {}
@@ -68,6 +81,7 @@ export class KiosksService {
         promotions: {
           where: { active: true },
           orderBy: { createdAt: 'asc' },
+          include: { rules: true },
         },
         _count: { select: { visits: true } },
       },
@@ -83,12 +97,13 @@ export class KiosksService {
 
     // Promos para las que el player ya califica
     const promotions = k.promotions
-      .filter((p) => myVisits >= p.minVisits)
-      .map((p) => ({
-        id: p.id,
-        title: p.title,
-        description: p.description,
-        minVisits: p.minVisits,
+      .map((p) => ({ promo: p, minVisits: requiredVisits(p.rules) }))
+      .filter(({ minVisits }) => myVisits >= minVisits)
+      .map(({ promo, minVisits }) => ({
+        id: promo.id,
+        title: promo.title,
+        description: promo.description,
+        minVisits,
         eligible: true,
       }));
 
