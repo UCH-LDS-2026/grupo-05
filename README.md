@@ -1,174 +1,97 @@
-# Spot — MVP (slice player) · Guía para correrlo local
+# Spot
 
-> **Empezá por acá.** Esta guía te lleva de una PC limpia a tener el MVP de Spot
-> corriendo en el navegador en ~10 minutos. Pensada para que cualquier dev del
-> equipo lo levante sin vueltas.
+Plataforma **two-sided** para descubrir, reseñar y fidelizar clientes en kioscos de
+barrio.
 
-Spot es una plataforma para descubrir y puntuar kioscos. Este MVP cubre el lado
-**player**: ingresás con un código de invitación, ves kioscos, marcás visitas y
-dejás reseñas con puntaje por categorías.
+- **Players** (app móvil/web): ingresan con código de invitación, marcan visitas,
+  dejan reseñas por 5 categorías y canjean promociones.
+- **Owners** (panel): registran su kiosco, definen promociones por reglas y validan
+  canjes en el mostrador.
+- **Admins**: validan owners y moderan.
 
-- **Backend**: NestJS + Prisma + PostgreSQL (en Docker)
-- **Frontend**: Expo / React Native Web (corre en el navegador)
-- **Monorepo**: pnpm workspaces
+**Stack:** NestJS + Prisma + PostgreSQL (backend) · Expo / React Native Web
+(frontend) · monorepo pnpm · Docker.
+
+> TP de **Laboratorio de Desarrollo de Software** — Grupo 5 (UCH 2026).
 
 ---
 
-## 1. Requisitos previos
+## Correr todo en local con Docker (recomendado)
 
-Instalá estas 3 cosas (si ya las tenés, salteá):
+Es la misma forma en que se construye el deploy: cada servicio se levanta desde su
+`Dockerfile`. Solo necesitás **Docker Desktop** abierto.
 
-| Herramienta | Versión | Cómo instalar |
+```bash
+docker compose up -d --build
+```
+
+Esto levanta los 4 servicios:
+
+| Servicio | URL | Qué es |
 |---|---|---|
-| **Node.js** | 20 LTS o más | https://nodejs.org (instalá la versión "LTS") |
-| **pnpm** | 9+ | con Node ya instalado: `npm install -g pnpm` |
-| **Docker** | Desktop | https://www.docker.com/products/docker-desktop/ (Windows/Mac) |
+| **app** | http://localhost:8081 | Frontend (Expo web) |
+| **api** | http://localhost:3001 | Backend (NestJS) |
+| **pgweb** | http://localhost:8082 | Explorador de la base |
+| **db** | localhost:5433 | PostgreSQL 16 |
 
-Verificá que todo esté ok (abrí una terminal):
-
-```bash
-node -v      # v20.x.x o superior
-pnpm -v      # 9.x.x o superior
-docker -v    # Docker version 2x.x.x
-```
-
-> **Importante (Docker)**: después de instalar Docker Desktop, **abrilo y dejalo
-> corriendo** (ícono de la ballenita en la barra de tareas). Si Docker Desktop no
-> está abierto, el comando para levantar la base va a fallar con algo tipo
-> *"cannot connect to the Docker daemon"*.
-
----
-
-## 2. Levantar la base de datos (PostgreSQL en Docker)
-
-No hace falta instalar Postgres: corre dentro de un contenedor Docker definido en
-`docker-compose.yml`. Desde la **raíz del proyecto**:
+La API aplica las migraciones y, **si la base está vacía**, carga datos de demo
+automáticamente (`docker-entrypoint.sh`). Cuando veas `🟠 Spot API escuchando…`,
+abrí **http://localhost:8081**.
 
 ```bash
-docker compose up -d db
+docker compose logs -f api     # ver el arranque / migraciones / seed
+docker compose down            # apagar (los datos quedan en el volumen)
+docker compose down -v         # apagar y borrar los datos (reset total)
 ```
 
-Esto:
-- descarga la imagen `postgres:16` (solo la primera vez),
-- crea un contenedor llamado `spot-db`,
-- expone Postgres en **localhost:5433** (usamos 5433 y no el 5432 default para no
-  chocar con un Postgres que ya tengas instalado),
-- guarda los datos en un volumen Docker (persisten aunque apagues el contenedor).
+### Cuentas de demo (seed)
 
-Comprobá que esté arriba:
-
-```bash
-docker ps            # deberías ver el contenedor "spot-db"
-```
-
-| Comando útil | Para qué |
+| Rol | Acceso |
 |---|---|
-| `docker compose up -d db` | levantar la base |
-| `docker compose stop` | pausar (sin borrar datos) |
-| `docker compose down` | apagar y borrar el contenedor (los datos quedan en el volumen) |
-| `docker compose down -v` | apagar y **borrar también los datos** (reset total) |
-| `docker logs spot-db` | ver los logs de la base |
-
-> Si usás una versión vieja de Docker, el comando puede ser `docker-compose` (con
-> guion) en lugar de `docker compose`. Ambos hacen lo mismo.
+| **Player** | códigos `SPOT2026` / `YESMZA` (libres, los activás con tu nombre) · `DEMO` (player "Sofi", precargada con visitas y reseñas) |
+| **Owner** | `owner@spot.dev` / `spot1234` (ya validado, con kioscos) |
+| **Admin** | `admin@spot.dev` / `spot1234` |
 
 ---
 
-## 3. Instalar dependencias
+## Correr en modo desarrollo (sin Docker para el código)
 
-Desde la **raíz del proyecto**:
-
-```bash
-pnpm install
-```
-
-> La primera vez tarda un poco (baja todo NestJS, Expo, etc.). pnpm puede avisar
-> que "ignoró build scripts" — ya está contemplado en la config del repo
-> (`onlyBuiltDependencies`), así que Prisma y esbuild se compilan igual.
-
----
-
-## 4. Configurar variables de entorno (.env)
-
-Hay dos `.env` que crear a partir de las plantillas `.env.example` (no se
-commitean porque pueden tener secretos). Desde la raíz:
+Útil para iterar con hot-reload. Solo la base va en Docker.
 
 ```bash
-# Backend
-cp src/apps/api/.env.example src/apps/api/.env
-
-# Frontend
-cp src/apps/app/.env.example src/apps/app/.env
-```
-
-> En Windows (PowerShell) usá `copy` en vez de `cp`, o copialos a mano.
-
-Los valores por defecto ya funcionan para correr todo en tu PC. No hace falta tocar
-nada.
-
----
-
-## 5. Preparar la base (tablas + datos de demo)
-
-```bash
+pnpm install                       # 1. dependencias (monorepo)
+docker compose up -d db            # 2. solo Postgres
 cd src/apps/api
-pnpm prisma:migrate     # crea las tablas en Postgres
-pnpm seed               # carga kioscos, tags y códigos de invitación de demo
-cd ../..
+cp .env.example .env               # 3. envs (los defaults ya funcionan)
+pnpm prisma:migrate                #    crea las tablas
+pnpm seed                          #    carga los datos de demo
+pnpm start:dev                     # 4. backend en watch → :3001
+# en otra terminal, desde la raíz:
+pnpm app:web                       #    frontend Expo web → :8081
 ```
 
-El seed deja:
-- 6 kioscos (Yes Mendoza + uno independiente) con tags,
-- códigos de invitación **`SPOT2026`** y **`YESMZA`** (libres, los activás con tu nombre),
-- código **`DEMO`** ya activado (player "Sofi") con visitas y reseñas de ejemplo.
+> En la primera corrida pnpm puede avisar que "ignoró build scripts": ya está
+> contemplado (`onlyBuiltDependencies`), Prisma y esbuild se compilan igual.
 
 ---
 
-## 6. Levantar el proyecto
-
-Necesitás **dos terminales** (backend y frontend corren a la vez).
-
-**Terminal 1 — Backend** (desde la raíz):
+## Tests
 
 ```bash
-pnpm api:dev
+# Backend — unit (servicios con Prisma mockeado)
+cd src/apps/api && pnpm test
+
+# Backend — e2e (levanta el AppModule real contra Postgres; requiere la base arriba)
+docker compose up -d db
+cd src/apps/api && pnpm test:e2e
+
+# Frontend — componentes (jest-expo + testing-library)
+cd src/apps/app && pnpm test
 ```
 
-Esperá a ver: `🟠 Spot API escuchando en http://localhost:3001`
-
-**Terminal 2 — Frontend** (desde la raíz):
-
-```bash
-pnpm app:web
-```
-
-Cuando termine de compilar, abrí **http://localhost:8081** en el navegador.
-
----
-
-## 7. Probar el flujo 🎉
-
-1. **Login**: ingresá el código `SPOT2026` (o `YESMZA`) y tu nombre → **Entrar**.
-2. **Lista**: vas a ver 6 kioscos con su rating, tags y cantidad de visitas.
-3. **Detalle**: tocá un kiosco → **Marcar visita**.
-4. **Reseña**: puntuá las 5 categorías (atención, variedad, limpieza, precios,
-   ambiente), escribí un comentario y **Publicar reseña**. El promedio del kiosco
-   se actualiza al toque.
-
----
-
-## 8. Problemas comunes
-
-| Síntoma | Causa / solución |
-|---|---|
-| `cannot connect to the Docker daemon` | Docker Desktop no está abierto. Abrilo y reintentá. |
-| `port 5433 already in use` | Ya tenés algo en ese puerto. Cambiá el `5433:5432` en `docker-compose.yml` (ej. `5434:5432`) y actualizá el puerto en `src/apps/api/.env`. |
-| `port 3001 already in use` | Cambiá `API_PORT` en `src/apps/api/.env` y `EXPO_PUBLIC_API_URL` en `src/apps/app/.env`. |
-| El front carga pero no trae kioscos / da error de red | ¿Está corriendo el backend (Terminal 1)? ¿`EXPO_PUBLIC_API_URL` apunta al puerto correcto? |
-| `Environment variable not found: DATABASE_URL` | Falta el `.env` en `src/apps/api/` (paso 4). |
-| Prisma se queja del cliente no generado | Corré `cd src/apps/api && pnpm prisma:generate`. |
-| Quiero empezar de cero con la base | `docker compose down -v` y repetí desde el paso 2 + paso 5. |
-| Compila muy lento (Windows) | Si el proyecto está en una ruta de Windows bajo WSL (`/mnt/c/...`), Metro va más lento. Es normal; la primera compilación del front puede tardar 1-2 min. |
+Cobertura: motor de promociones (reglas FREQUENCY/AMOUNT/PRODUCTS, caps, vigencia,
+audiencia), canje, autenticación, servicios de kioscos/visitas/reseñas; flujo e2e
+`login → kioscos → visita → reseña`; y los componentes `Stars` / `RatingPicker`.
 
 ---
 
@@ -176,34 +99,49 @@ Cuando termine de compilar, abrí **http://localhost:8081** en el navegador.
 
 ```
 .
-├── docker-compose.yml          PostgreSQL 16 (contenedor spot-db, puerto 5433)
+├── docker-compose.yml          db + api + app + pgweb (build desde los Dockerfiles)
 ├── pnpm-workspace.yaml         workspace → src/apps/*
-├── package.json                scripts del monorepo (db:up, api:dev, app:web, seed)
-├── .env.example                referencia de variables
-├── SETUP.md                    ESTA guía
 ├── src/apps/
 │   ├── api/                    Backend NestJS + Prisma
-│   │   ├── prisma/             schema.prisma + seed.ts
-│   │   ├── src/                auth (JWT/invite), kiosks, visits, reviews
-│   │   └── .env.example        plantilla de envs del backend
+│   │   ├── prisma/             schema.prisma (dominio de 12 entidades) + seed.ts
+│   │   ├── src/
+│   │   │   ├── auth/           login player (invite) + owner/admin, JWT con rol
+│   │   │   ├── kiosks/         listado y detalle de kioscos
+│   │   │   ├── visits/         registro de visitas
+│   │   │   ├── reviews/        reseñas por 5 categorías
+│   │   │   ├── promotions/     motor de promociones por reglas (+ CRUD del owner)
+│   │   │   └── redemptions/    canje: código corto + QR, validación en mostrador
+│   │   ├── test/               tests e2e
+│   │   └── Dockerfile
 │   └── app/                    Frontend Expo (web)
-│       ├── app/                pantallas (expo-router): login, kiosks, kiosks/[id]
+│       ├── app/                pantallas: login, owner/*, kiosks, kiosks/[id], redeem
 │       ├── components/         Stars, RatingPicker
-│       ├── lib/                api, auth, storage
-│       └── .env.example        plantilla de envs del frontend
-└── docs/                       arquitectura.md, modelo-datos.md, correr-mvp.md, diagramas
+│       └── Dockerfile
+└── docs/                       arquitectura.md, modelo-datos.md, diagramas UML
 ```
 
-Más detalle técnico en [`docs/arquitectura.md`](docs/arquitectura.md) y
+Más detalle en [`docs/arquitectura.md`](docs/arquitectura.md) y
 [`docs/modelo-datos.md`](docs/modelo-datos.md).
 
 ---
 
-## Scripts rápidos (desde la raíz)
+## Deploy
 
-| Script | Hace |
+Cada push a `main` dispara el autodeploy (build de los `Dockerfile` de `api` y
+`app`). El contenedor de la API corre las migraciones (`prisma migrate deploy`) al
+arrancar y siembra la base solo si está vacía.
+
+Workflow del equipo: `main` protegida, una rama por feature/fix, PR con review
+cruzado (nadie aprueba su propio PR), squash merge.
+
+---
+
+## Problemas comunes
+
+| Síntoma | Causa / solución |
 |---|---|
-| `pnpm db:up` | levanta Postgres en Docker (= `docker compose up -d db`) |
-| `pnpm api:dev` | corre el backend en modo dev (watch) |
-| `pnpm app:web` | corre el frontend Expo en web |
-| `pnpm seed` | recarga los datos de demo (resetea kioscos/códigos) |
+| `cannot connect to the Docker daemon` | Docker Desktop no está abierto. Abrilo y reintentá. |
+| `port 5433/3001/8081 already in use` | Ya hay algo en ese puerto. Cambiá el mapeo en `docker-compose.yml`. |
+| El front carga pero no trae kioscos | ¿La API está arriba (`docker compose logs api`)? ¿`EXPO_PUBLIC_API_URL` apunta a `:3001`? |
+| Quiero empezar de cero con la base | `docker compose down -v` y volvé a levantar. |
+| Compila lento en Windows | Si el repo está en `/mnt/c/...` bajo WSL, el FS de Windows es más lento. Conviene clonarlo en el FS de Linux (`~/`). |

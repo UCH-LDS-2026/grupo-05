@@ -12,5 +12,45 @@ services:
     volumes:
       - spot_db_data:/var/lib/postgresql/data
 
+  api:
+    build:
+      context: .
+      dockerfile: src/apps/api/Dockerfile
+    container_name: spot-api
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    environment:
+      - DATABASE_URL=postgresql://spot:spot_dev_pw@db:5432/spot?schema=public
+      - JWT_SECRET=dev-secret-spot-mvp-no-usar-en-prod-1a2b3c4d5e6f7g8h
+      - JWT_EXPIRES_IN=7d
+      - API_PORT=3001
+    depends_on:
+      - db
+
+  app:
+    build:
+      context: .
+      dockerfile: src/apps/app/Dockerfile
+    container_name: spot-app
+    restart: unless-stopped
+    ports:
+      - "8081:8081"
+    environment:
+      - EXPO_PUBLIC_API_URL=http://localhost:3001
+    depends_on:
+      - api
+
+  pgweb:
+    image: sosedoff/pgweb:0.16.1
+    container_name: spot-pgweb
+    restart: unless-stopped
+    ports:
+      - "8082:8081"
+    environment:
+      - DATABASE_URL=postgresql://spot:spot_dev_pw@db:5432/spot?sslmode=disable
+    depends_on:
+      - db
+
 volumes:
   spot_db_data:
