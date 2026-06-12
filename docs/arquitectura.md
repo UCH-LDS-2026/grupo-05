@@ -1,14 +1,9 @@
 # Arquitectura del sistema
 
-> Spot es una plataforma **two-sided**: players (clientes, app móvil), owners
-> (dueños de kiosco, panel web) y admins (plataforma).
->
-> **Estado (post Fase 0):** el **modelo de dominio completo (11 clases)** y la
-> **autenticación con roles** (player por invite code; owner/admin por
-> email+password; JWT con `role`) están implementados. Los módulos de feature del
-> lado owner —onboarding, motor de promociones, canje— se desarrollan en Fase 1
-> sobre estos contratos (ver [contratos.md](./contratos.md)). El flujo del player
-> (login → kioscos → visita → reseña) ya está funcional.
+> MVP **slice player** de Spot: el cliente (player) ingresa por invitación,
+> descubre kioscos, registra visitas y deja reseñas con puntaje por categorías.
+> El lado owner (motor de promociones, validación de canjes) está modelado en el
+> dominio pero queda fuera de este MVP.
 
 ## Stack tecnológico
 
@@ -46,21 +41,16 @@ lógica en su service; el acceso a datos pasa por un `PrismaService` global.
 
 | Módulo | Responsabilidad | Endpoints |
 |---|---|---|
-| `auth` | Login player (invite), registro/login owner, login admin; JWT con rol | `POST /auth/login`, `POST /auth/owner/register`, `POST /auth/owner/login`, `POST /auth/admin/login`, `GET /auth/me` |
+| `auth` | Login por código de invitación, emisión y verificación de JWT | `POST /auth/login`, `GET /auth/me` |
 | `kiosks` | Listado y detalle de kioscos (con promedio de rating y tags) | `GET /kiosks`, `GET /kiosks/:id` |
 | `visits` | Registro de visitas de un player a un kiosco | `POST /kiosks/:id/visits` |
 | `reviews` | Alta/edición de reseña (1 por player por kiosco) | `POST /kiosks/:id/reviews` |
 
-> Módulos de Fase 1 (sobre los contratos ya definidos): `owner` (onboarding +
-> panel), `promotions` (motor de reglas), `redemptions` (canje).
-
-**Autenticación con roles**: tres caminos de login —player por `InviteCode`,
-owner/admin por email+password (hash con `bcryptjs`)—. El owner se registra en
-estado `PENDIENTE_VALIDACION` (lo valida un admin). El JWT
-(`{ sub, name, role }`, con `role ∈ {PLAYER, OWNER, ADMIN}`) viaja en
-`Authorization: Bearer`. `JwtAuthGuard` lo verifica y adjunta `req.user`; el
-decorator `@CurrentUser()` lo inyecta. Para gatear por rol: `RolesGuard` +
-`@Roles('OWNER')`. `@CurrentPlayer()` se mantiene para los endpoints del player.
+**Autenticación**: el login valida el `InviteCode`. Si nunca se canjeó, da de alta
+al `Player` (con su nombre); si ya tiene player asociado, re-emite el token. El JWT
+(`{ sub: playerId, name }`) viaja en el header `Authorization: Bearer`. Un guard
+(`JwtAuthGuard`) lo verifica y adjunta el player a la request; el decorator
+`@CurrentPlayer()` lo inyecta en los controllers.
 
 **Validación**: DTOs con `class-validator` + `ValidationPipe` global (whitelist).
 
@@ -79,7 +69,9 @@ decorator `@CurrentUser()` lo inyecta. Para gatear por rol: `RolesGuard` +
   TypeScript autogenerados compartidos por los services.
 - **Reseña como upsert** (`@@unique([playerId, kioskId])`): un player tiene una
   sola reseña por kiosco, editable, en lugar de acumular duplicados.
+- **Slice acotado**: se implementa la ruta de valor del player end-to-end antes
+  que abarcar todo el dominio, para tener algo funcional y demostrable.
 
 ## Cómo correr
 
-Deploy con Docker (un comando) y desarrollo local: ver [`DEPLOY.md`](../DEPLOY.md).
+Ver [correr-mvp.md](./correr-mvp.md).

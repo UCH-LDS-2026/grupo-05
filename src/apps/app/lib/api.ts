@@ -1,17 +1,6 @@
 import { getToken, Player } from './storage';
 
-const getApiBaseUrl = () => {
-  if (typeof window !== 'undefined' && window.location) {
-    const hostname = window.location.hostname;
-    if (hostname && hostname !== 'localhost' && hostname !== '127.0.0.1') {
-      return `http://${hostname}:3001`;
-    }
-  }
-  return process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:3001';
-};
-
-const BASE = getApiBaseUrl();
-
+const BASE = process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:3001';
 
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   const token = getToken();
@@ -57,9 +46,31 @@ export type ReviewItem = {
   createdAt: string;
 };
 
+export type PromotionItem = {
+  id: string;
+  title: string;
+  description: string | null;
+  minVisits: number;
+  eligible: boolean;
+};
+
+export type RedemptionStart = {
+  redemptionId: string;
+  code: string;
+  expiresAt: string; // ISO
+  redeemedAt: string | null;
+  promotion: {
+    id: string;
+    title: string;
+    description: string | null;
+    kioskName: string;
+  };
+};
+
 export type KioskDetail = KioskListItem & {
   myVisits: number;
   myReview: (ReviewItem & { playerId: string }) | null;
+  promotions: PromotionItem[];
   reviews: ReviewItem[];
 };
 
@@ -90,4 +101,9 @@ export const api = {
       method: 'POST',
       body: JSON.stringify(body),
     }),
+  redeemPromo: (kioskId: string, promotionId: string) =>
+    request<RedemptionStart>(
+      `/kiosks/${kioskId}/promotions/${promotionId}/redeem`,
+      { method: 'POST' },
+    ),
 };
