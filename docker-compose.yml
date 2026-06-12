@@ -1,6 +1,3 @@
-# Spot — stack completo (db + api + app) en un solo comando:
-#   docker compose up --build
-# El API aplica migraciones y carga datos de demo la primera vez.
 services:
   db:
     image: postgres:16
@@ -14,42 +11,6 @@ services:
       - "5433:5432"
     volumes:
       - spot_db_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U spot -d spot"]
-      interval: 5s
-      timeout: 5s
-      retries: 10
-
-  api:
-    build:
-      context: .
-      dockerfile: src/apps/api/Dockerfile
-    container_name: spot-api
-    restart: unless-stopped
-    ports:
-      - "3001:3001"
-    environment:
-      - DATABASE_URL=postgresql://spot:spot_dev_pw@db:5432/spot?schema=public
-      - JWT_SECRET=dev-secret-spot-no-usar-en-prod-cambiar-por-una-larga
-      - JWT_EXPIRES_IN=7d
-      - API_PORT=3001
-    depends_on:
-      db:
-        condition: service_healthy
-
-  app:
-    build:
-      context: .
-      dockerfile: src/apps/app/Dockerfile
-      args:
-        # URL del API que ve el navegador (horneada en el bundle estático).
-        EXPO_PUBLIC_API_URL: http://localhost:3001
-    container_name: spot-app
-    restart: unless-stopped
-    ports:
-      - "8081:8081"
-    depends_on:
-      - api
 
 volumes:
   spot_db_data:

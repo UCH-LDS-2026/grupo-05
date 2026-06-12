@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import { RatingPicker } from '../../components/RatingPicker';
 import { Stars } from '../../components/Stars';
-import { api, KioskDetail, ReviewInput } from '../../lib/api';
+import { api, KioskDetail, PromotionItem, ReviewInput } from '../../lib/api';
 import { colors, radius, space } from '../../theme';
 
 const CATS: { key: keyof Omit<ReviewInput, 'comment'>; label: string }[] = [
@@ -30,6 +30,7 @@ function overall(r: { attention: number; variety: number; cleanliness: number; p
 
 export default function KioskDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
+  const router = useRouter();
   const [kiosk, setKiosk] = useState<KioskDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [savingVisit, setSavingVisit] = useState(false);
@@ -101,6 +102,14 @@ export default function KioskDetailScreen() {
     }
   }
 
+  function onRedeem(promo: PromotionItem) {
+    if (!id) return;
+    router.push({
+      pathname: '/kiosks/redeem',
+      params: { kioskId: id, promotionId: promo.id },
+    });
+  }
+
   if (loading || !kiosk) {
     return (
       <View style={styles.loading}>
@@ -170,6 +179,30 @@ export default function KioskDetailScreen() {
           </Text>
         </Pressable>
       </View>
+
+      {/* Promos elegibles */}
+      {kiosk.promotions.length > 0 && (
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>🎁 Tus promociones</Text>
+          {kiosk.promotions.map((p) => (
+            <View key={p.id} style={styles.promoRow}>
+              <View style={styles.promoInfo}>
+                <Text style={styles.promoTitle}>{p.title}</Text>
+                {p.description ? (
+                  <Text style={styles.promoDesc}>{p.description}</Text>
+                ) : null}
+                <View style={styles.eligibleBadge}>
+                  <Ionicons name="checkmark-circle" size={13} color={colors.success} />
+                  <Text style={styles.eligibleText}>Eligible</Text>
+                </View>
+              </View>
+              <Pressable style={styles.redeemBtn} onPress={() => onRedeem(p)}>
+                <Text style={styles.redeemBtnText}>Canjear</Text>
+              </Pressable>
+            </View>
+          ))}
+        </View>
+      )}
 
       {/* Formulario de reseña */}
       <View style={styles.section}>
@@ -287,6 +320,33 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
   },
   sectionTitle: { fontSize: 17, fontWeight: '700', color: colors.text, marginBottom: space.sm },
+  // Promos
+  promoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
+    paddingVertical: space.md,
+    gap: space.sm,
+  },
+  promoInfo: { flex: 1, gap: 2 },
+  promoTitle: { fontSize: 15, fontWeight: '700', color: colors.text },
+  promoDesc: { fontSize: 13, color: colors.navySoft },
+  eligibleBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+    marginTop: 2,
+  },
+  eligibleText: { fontSize: 12, color: colors.success, fontWeight: '600' },
+  redeemBtn: {
+    backgroundColor: colors.primary,
+    borderRadius: radius.md,
+    paddingHorizontal: space.md,
+    paddingVertical: space.sm,
+  },
+  redeemBtnText: { color: colors.white, fontWeight: '700', fontSize: 14 },
+  // Review form
   comment: {
     borderWidth: 1,
     borderColor: colors.border,

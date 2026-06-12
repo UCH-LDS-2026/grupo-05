@@ -65,6 +65,10 @@ export class KiosksService {
           orderBy: { createdAt: 'desc' },
           include: { player: { select: { name: true } } },
         },
+        promotions: {
+          where: { active: true },
+          orderBy: { createdAt: 'asc' },
+        },
         _count: { select: { visits: true } },
       },
     });
@@ -76,6 +80,17 @@ export class KiosksService {
     const myReview = await this.prisma.review.findUnique({
       where: { playerId_kioskId: { playerId, kioskId: id } },
     });
+
+    // Promos para las que el player ya califica
+    const promotions = k.promotions
+      .filter((p) => myVisits >= p.minVisits)
+      .map((p) => ({
+        id: p.id,
+        title: p.title,
+        description: p.description,
+        minVisits: p.minVisits,
+        eligible: true,
+      }));
 
     return {
       id: k.id,
@@ -91,6 +106,7 @@ export class KiosksService {
       avgRating: this.overall(k.reviews),
       myVisits,
       myReview,
+      promotions,
       reviews: k.reviews.map((r) => ({
         id: r.id,
         author: r.player.name,
