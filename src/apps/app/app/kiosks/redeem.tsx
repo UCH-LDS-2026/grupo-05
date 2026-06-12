@@ -9,8 +9,8 @@ import {
   View,
 } from 'react-native';
 import QRCode from 'react-native-qrcode-svg';
-import { api, RedemptionStart } from '../../../lib/api';
-import { colors, radius, space } from '../../../theme';
+import { api, RedemptionStart } from '../../lib/api';
+import { colors, radius, space } from '../../theme';
 
 const TTL_MS = 10 * 60 * 1000;
 
