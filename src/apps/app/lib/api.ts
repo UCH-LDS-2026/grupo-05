@@ -106,4 +106,14 @@ export const api = {
       `/kiosks/${kioskId}/promotions/${promotionId}/redeem`,
       { method: 'POST' },
     ),
+  ownerRegister: (name: string, email: string, password: string) =>
+    request('/auth/owner/register', {
+      method: 'POST',
+      body: JSON.stringify({ name, email, password }),
+    }),
+  ownerLogin: (email: string, password: string) =>
+    request('/auth/owner/login', {
+      method: 'POST',
+      body: JSON.stringify({ email, password }),
+    }),
 };

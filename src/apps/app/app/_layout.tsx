@@ -19,6 +19,9 @@ export default function RootLayout() {
         >
           <Stack.Screen name="index" options={{ headerShown: false }} />
           <Stack.Screen name="login" options={{ headerShown: false }} />
+          <Stack.Screen name="owner/login" options={{ title: 'Acceso Dueños', headerShown: true }} />
+          <Stack.Screen name="owner/register" options={{ title: 'Registro', headerShown: true }} />
+          <Stack.Screen name="owner/validation" options={{ headerShown: false }} />
           <Stack.Screen name="kiosks/index" options={{ title: 'Spot' }} />
           <Stack.Screen name="kiosks/[id]" options={{ title: 'Kiosco' }} />
         </Stack>
