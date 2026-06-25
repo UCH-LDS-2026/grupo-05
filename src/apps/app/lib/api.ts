@@ -93,6 +93,36 @@ export type ReviewInput = {
   comment?: string;
 };
 
+// --- Tipos de Owner ---
+export type KioskUpsert = {
+  name: string;
+  address: string;
+  city?: string;
+  brand?: string | null;
+  lat?: number | null;
+  lng?: number | null;
+};
+
+export type OwnerKioskItem = KioskUpsert & { id: string; ownerId: string };
+
+export type KioskStats = {
+  kioskId: string;
+  uniqueVisitors: number;
+  avgRating: number | null;
+  reviewCount: number;
+  redemptionCount: number;
+};
+
+// --- Tipos de Admin ---
+export type AdminOwnerItem = {
+  id: string;
+  name: string;
+  email: string;
+  status: 'PENDIENTE_VALIDACION' | 'VALIDADO' | 'RECHAZADO';
+  createdAt: string;
+};
+
+
 export const api = {
   login: (code: string, name?: string) =>
     request<{ token: string; player: Player }>('/auth/login', {
@@ -125,5 +155,28 @@ export const api = {
     request('/auth/owner/login', {
       method: 'POST',
       body: JSON.stringify({ email, password }),
+    }),
+  ownerKiosks: () => request<OwnerKioskItem[]>('/owner/kiosks'),
+  ownerCreateKiosk: (body: KioskUpsert) =>
+    request<OwnerKioskItem>('/owner/kiosks', {
+      method: 'POST',
+      body: JSON.stringify(body),
+    }),
+  ownerUpdateKiosk: (id: string, body: KioskUpsert) =>
+    request<OwnerKioskItem>(`/owner/kiosks/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(body),
+    }),
+  ownerKioskStats: (id: string) =>
+    request<KioskStats>(`/owner/kiosks/${id}/stats`),
+  adminLogin: (email: string, password: string) =>
+    request('/auth/admin/login', {
+      method: 'POST',
+      body: JSON.stringify({ email, password }),
+    }),
+  adminOwners: () => request<AdminOwnerItem[]>('/admin/owners'),
+  adminValidateOwner: (id: string) =>
+    request<AdminOwnerItem>(`/admin/owners/${id}/validate`, {
+      method: 'PATCH',
     }),
 };

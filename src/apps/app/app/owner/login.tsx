@@ -2,6 +2,7 @@ import { Link, useRouter } from 'expo-router';
 import { useState } from 'react';
 import { ActivityIndicator, KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, TextInput, View, Alert } from 'react-native';
 import { api } from '../../lib/api';
+import { saveSession } from '../../lib/storage';
 import { colors, radius, space } from '../../theme';
 
 export default function OwnerLogin() {
@@ -22,11 +23,12 @@ export default function OwnerLogin() {
       const res = await api.ownerLogin(email.trim(), password.trim()) as any;
       const owner = res.owner;
       
+      saveSession(res.token, { id: owner.id, name: owner.name });
+      
       if (owner.status === 'PENDIENTE_VALIDACION') {
         router.replace('/owner/validation');
       } else {
-        Alert.alert('Éxito', 'Login exitoso y cuenta validada.');
-        // router.replace('/owner/dashboard');
+        router.replace('/owner');
       }
     } catch (e: any) {
       setError(e?.message ?? 'Credenciales inválidas');
