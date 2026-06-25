@@ -23,7 +23,7 @@ RUN cd src/apps/api \
   && pnpm exec nest build
 
 COPY src/apps/api/docker-entrypoint.sh /usr/local/bin/spot-entrypoint.sh
-RUN sed -i 's/\r//' /usr/local/bin/spot-entrypoint.sh \
+RUN sed -i 's/\r$//' /usr/local/bin/spot-entrypoint.sh \
   && chmod +x /usr/local/bin/spot-entrypoint.sh
 
 EXPOSE 3001

@@ -1,6 +1,8 @@
 import { getToken, Player } from './storage';
 
-const BASE = process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:3001';
+declare const process: { env?: Record<string, string | undefined> };
+
+const BASE = process.env?.EXPO_PUBLIC_API_URL ?? 'http://localhost:3001';
 
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   const token = getToken();
@@ -73,6 +75,28 @@ export type RedemptionStart = {
     id: string;
     title: string;
     description: string | null;
+    kioskName: string;
+  };
+};
+
+export type RedemptionValidation = {
+  redemptionId: string;
+  code: string;
+  status: 'REDEEMED';
+  expiresAt: string;
+  redeemedAt: string | null;
+  player: {
+    id: string;
+    name: string;
+  };
+  promotion: {
+    id: string;
+    title: string;
+    description: string | null;
+    rewardType: 'FREE_PRODUCT' | 'DISCOUNT_PCT' | 'DISCOUNT_AMOUNT' | 'TWO_FOR_ONE';
+    rewardValue: number | null;
+    rewardProduct: string | null;
+    kioskId: string;
     kioskName: string;
   };
 };
@@ -169,6 +193,11 @@ export const api = {
     }),
   ownerKioskStats: (id: string) =>
     request<KioskStats>(`/owner/kiosks/${id}/stats`),
+  validateRedemption: (code: string) =>
+    request<RedemptionValidation>('/owner/redemptions/validate', {
+      method: 'POST',
+      body: JSON.stringify({ code }),
+    }),
   adminLogin: (email: string, password: string) =>
     request('/auth/admin/login', {
       method: 'POST',
