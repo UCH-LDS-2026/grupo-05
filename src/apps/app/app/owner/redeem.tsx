@@ -1,6 +1,6 @@
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { useRouter } from 'expo-router';
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -47,9 +47,26 @@ export default function OwnerRedeemScreen() {
   const [scanning, setScanning] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [result, setResult] = useState<RedemptionRedeemed | null>(null);
+  const [scannerError, setScannerError] = useState<string | null>(null);
+  const [cameraAvailable, setCameraAvailable] = useState<boolean | null>(null);
   const scanLocked = useRef(false);
 
   const normalizedCode = useMemo(() => extractCode(code), [code]);
+
+  useEffect(() => {
+    let mounted = true;
+    CameraView.isAvailableAsync()
+      .then((available) => {
+        if (mounted) setCameraAvailable(available);
+      })
+      .catch(() => {
+        if (mounted) setCameraAvailable(false);
+      });
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   async function confirmCode(rawCode = code) {
     const cleanCode = extractCode(rawCode);
@@ -82,10 +99,19 @@ export default function OwnerRedeemScreen() {
   }
 
   async function openScanner() {
+    setScannerError(null);
+    if (cameraAvailable === null) {
+      setScannerError('No se pudo confirmar la cámara. Ingresá el código manualmente.');
+      return;
+    }
+    if (cameraAvailable === false) {
+      setScannerError('No se encontró una cámara disponible. Ingresá el código manualmente.');
+      return;
+    }
     if (!permission?.granted) {
       const next = await requestPermission();
       if (!next.granted) {
-        Alert.alert('Permiso requerido', 'Necesitás habilitar la cámara para escanear QR.');
+        setScannerError('Permiso de cámara denegado. Ingresá el código manualmente.');
         return;
       }
     }
@@ -100,6 +126,10 @@ export default function OwnerRedeemScreen() {
           style={styles.camera}
           facing="back"
           barcodeScannerSettings={{ barcodeTypes: ['qr'] }}
+          onMountError={({ message }) => {
+            setScannerError(message || 'La cámara no pudo iniciar. Ingresá el código manualmente.');
+            setScanning(false);
+          }}
           onBarcodeScanned={({ data }) => {
             if (scanLocked.current || submitting) return;
             scanLocked.current = true;
@@ -158,6 +188,7 @@ export default function OwnerRedeemScreen() {
             )}
           </Pressable>
         </View>
+        {scannerError ? <Text style={styles.fallbackText}>{scannerError}</Text> : null}
       </View>
 
       {result ? (
@@ -268,6 +299,7 @@ const styles = StyleSheet.create({
   resultText: { color: colors.navySoft, fontSize: 14, marginTop: 2 },
   resultCode: { color: colors.muted, fontSize: 12, marginTop: 4, fontWeight: '700' },
   webHint: { color: colors.muted, fontSize: 12, lineHeight: 18, textAlign: 'center' },
+  fallbackText: { color: colors.muted, fontSize: 12, lineHeight: 18 },
   scannerScreen: { flex: 1, backgroundColor: colors.navy },
   camera: { flex: 1 },
   scannerOverlay: {

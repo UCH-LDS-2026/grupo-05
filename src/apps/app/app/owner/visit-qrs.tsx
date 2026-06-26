@@ -49,7 +49,7 @@ export default function OwnerVisitQrsScreen() {
         <Text style={styles.eyebrow}>QR diario</Text>
         <Text style={styles.title}>Visitas por kiosco</Text>
         <Text style={styles.subtitle}>
-          Este QR cambia cada día. El player debe escanear el QR del local para registrar una visita válida.
+          Este QR y código cambian cada día. El player puede escanear el QR o ingresar el código del local.
         </Text>
       </View>
 
@@ -77,6 +77,10 @@ export default function OwnerVisitQrsScreen() {
                 color={colors.navy}
                 backgroundColor={colors.card}
               />
+            </View>
+            <View style={styles.codeBox}>
+              <Text style={styles.codeLabel}>Código manual</Text>
+              <Text style={styles.visitCode}>{kiosk.visitCode}</Text>
             </View>
           </View>
         ))
@@ -131,6 +135,17 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
     padding: space.lg,
   },
+  codeBox: {
+    alignItems: 'center',
+    backgroundColor: colors.bg,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: colors.border,
+    padding: space.md,
+    gap: 4,
+  },
+  codeLabel: { color: colors.muted, fontSize: 12, fontWeight: '800', textTransform: 'uppercase' },
+  visitCode: { color: colors.navy, fontSize: 28, fontWeight: '900', letterSpacing: 4 },
   empty: {
     backgroundColor: colors.card,
     borderRadius: radius.lg,

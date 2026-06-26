@@ -2,7 +2,7 @@ import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/commo
 import { ConfigService } from '@nestjs/config';
 import { Review } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
-import { createVisitQrToken, todayKey } from '../visits/visit-qr';
+import { createVisitCode, createVisitQrToken, todayKey } from '../visits/visit-qr';
 import { KioskUpsertDto } from './dto/kiosk.dto';
 
 type RatingCats = Pick<
@@ -194,6 +194,7 @@ export class OwnerService {
       kiosks: kiosks.map((kiosk) => ({
         ...kiosk,
         visitToken: createVisitQrToken(kiosk.id, secret),
+        visitCode: createVisitCode(kiosk.id, secret),
       })),
     };
   }

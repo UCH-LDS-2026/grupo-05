@@ -36,6 +36,11 @@ export function createVisitQrToken(kioskId: string, secret: string, now = new Da
   return `${encodedPayload}.${sign(encodedPayload, secret)}`;
 }
 
+export function createVisitCode(kioskId: string, secret: string, now = new Date()) {
+  const seed = `${KIND}:${kioskId}:${todayKey(now)}`;
+  return sign(seed, secret).replace(/[^A-Z0-9]/gi, '').slice(0, 6).toUpperCase();
+}
+
 export function verifyVisitQrToken(token: string, secret: string): VisitQrPayload | null {
   const [encodedPayload, signature] = token.trim().split('.');
   if (!encodedPayload || !signature) return null;
@@ -63,4 +68,15 @@ export function verifyVisitQrToken(token: string, secret: string): VisitQrPayloa
   } catch {
     return null;
   }
+}
+
+export function verifyVisitCode(code: string, kioskId: string, secret: string, now = new Date()) {
+  const expected = createVisitCode(kioskId, secret, now);
+  const normalized = code.trim().toUpperCase();
+  const expectedBuffer = Buffer.from(expected);
+  const codeBuffer = Buffer.from(normalized);
+  return (
+    expectedBuffer.length === codeBuffer.length &&
+    timingSafeEqual(expectedBuffer, codeBuffer)
+  );
 }

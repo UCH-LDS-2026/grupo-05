@@ -1,7 +1,12 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../prisma/prisma.service';
-import { dayRange, todayKey, verifyVisitQrToken } from './visit-qr';
+import { dayRange, todayKey, verifyVisitCode, verifyVisitQrToken } from './visit-qr';
+
+type VisitProof = {
+  visitToken?: string;
+  visitCode?: string;
+};
 
 @Injectable()
 export class VisitsService {
@@ -10,16 +15,23 @@ export class VisitsService {
     private readonly config: ConfigService,
   ) {}
 
-  async create(playerId: string, kioskId: string, visitToken = '') {
+  async create(playerId: string, kioskId: string, proof: VisitProof | string = {}) {
     const kiosk = await this.prisma.kiosk.findUnique({ where: { id: kioskId } });
     if (!kiosk) throw new NotFoundException('Kiosco no encontrado');
 
-    const payload = verifyVisitQrToken(visitToken, this.qrSecret());
-    if (!payload || payload.kioskId !== kioskId || payload.date !== todayKey()) {
-      throw new BadRequestException('QR de visita inválido o vencido');
+    const secret = this.qrSecret();
+    const visitToken = typeof proof === 'string' ? proof : proof.visitToken;
+    const visitCode = typeof proof === 'string' ? undefined : proof.visitCode;
+    const payload = visitToken ? verifyVisitQrToken(visitToken, secret) : null;
+    const date = todayKey();
+    const validToken = payload?.kioskId === kioskId && payload.date === date;
+    const validCode = visitCode ? verifyVisitCode(visitCode, kioskId, secret) : false;
+
+    if (!validToken && !validCode) {
+      throw new BadRequestException('QR o código de visita inválido o vencido');
     }
 
-    const { from, to } = dayRange(payload.date);
+    const { from, to } = dayRange(date);
     const existingToday = await this.prisma.visit.findFirst({
       where: {
         playerId,
