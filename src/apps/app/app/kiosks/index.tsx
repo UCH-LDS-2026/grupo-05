@@ -13,6 +13,7 @@ import { Stars } from '../../components/Stars';
 import { api, KioskListItem } from '../../lib/api';
 import { useAuth } from '../../lib/auth';
 import { colors, radius, space } from '../../theme';
+import KiosksMap from '../../components/KiosksMap';
 
 export default function KiosksScreen() {
   const { player, logout } = useAuth();
@@ -20,6 +21,7 @@ export default function KiosksScreen() {
   const [kiosks, setKiosks] = useState<KioskListItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
 
   const load = useCallback(() => {
     setError(null);
@@ -57,6 +59,23 @@ export default function KiosksScreen() {
       <View style={styles.greeting}>
         <Text style={styles.hi}>Hola, {player?.name} 👋</Text>
         <Text style={styles.sub}>Descubrí y puntuá kioscos cerca tuyo.</Text>
+      </View>
+
+      <View style={styles.tabContainer}>
+        <Pressable
+          style={[styles.tabButton, viewMode === 'list' && styles.tabActive]}
+          onPress={() => setViewMode('list')}
+        >
+          <Ionicons name="list" size={16} color={viewMode === 'list' ? colors.white : colors.muted} />
+          <Text style={[styles.tabText, viewMode === 'list' && styles.tabTextActive]}>Lista</Text>
+        </Pressable>
+        <Pressable
+          style={[styles.tabButton, viewMode === 'map' && styles.tabActive]}
+          onPress={() => setViewMode('map')}
+        >
+          <Ionicons name="map" size={16} color={viewMode === 'map' ? colors.white : colors.muted} />
+          <Text style={[styles.tabText, viewMode === 'map' && styles.tabTextActive]}>Mapa</Text>
+        </Pressable>
       </View>
 
       {loading ? (
@@ -124,6 +143,8 @@ export default function KiosksScreen() {
             </Pressable>
           )}
         />
+      ) : (
+        <KiosksMap kiosks={kiosks} />
       )}
     </View>
   );
@@ -139,6 +160,37 @@ const styles = StyleSheet.create({
   },
   hi: { color: colors.white, fontSize: 20, fontWeight: '700' },
   sub: { color: colors.white, opacity: 0.75, marginTop: 2 },
+  tabContainer: {
+    flexDirection: 'row',
+    backgroundColor: colors.card,
+    borderBottomWidth: 1,
+    borderColor: colors.border,
+    padding: space.sm,
+    justifyContent: 'center',
+    gap: space.md,
+  },
+  tabButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: space.xs,
+    paddingHorizontal: space.md,
+    borderRadius: radius.md,
+    gap: space.xs,
+    borderWidth: 1,
+    borderColor: 'transparent',
+  },
+  tabActive: {
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
+  },
+  tabText: {
+    fontWeight: '600',
+    color: colors.muted,
+    fontSize: 14,
+  },
+  tabTextActive: {
+    color: colors.white,
+  },
   center: { alignItems: 'center', marginTop: space.xxl, gap: space.md },
   error: { color: colors.danger, fontSize: 15 },
   retry: {
