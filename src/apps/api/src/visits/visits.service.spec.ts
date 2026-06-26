@@ -1,5 +1,5 @@
 import { BadRequestException, NotFoundException } from '@nestjs/common';
-import { createVisitQrToken } from './visit-qr';
+import { createVisitCode, createVisitQrToken } from './visit-qr';
 import { VisitsService } from './visits.service';
 
 const mockPrisma = {
@@ -41,6 +41,26 @@ describe('VisitsService', () => {
     });
     expect(mockPrisma.visit.count).toHaveBeenCalledWith({
       where: { playerId: 'p1', kioskId: 'k1' },
+    });
+  });
+
+  it('registra la visita con código manual diario si no se escanea QR', async () => {
+    mockPrisma.kiosk.findUnique.mockResolvedValue({ id: 'k1' });
+    mockPrisma.visit.findFirst.mockResolvedValue(null);
+    mockPrisma.visit.create.mockResolvedValue({
+      id: 'v-code',
+      createdAt: new Date('2026-01-01'),
+    });
+    mockPrisma.visit.count.mockResolvedValue(1);
+
+    const result = await service.create('p1', 'k1', {
+      visitCode: createVisitCode('k1', 'test-secret'),
+    });
+
+    expect(result.id).toBe('v-code');
+    expect(result.totalVisits).toBe(1);
+    expect(mockPrisma.visit.create).toHaveBeenCalledWith({
+      data: { playerId: 'p1', kioskId: 'k1' },
     });
   });
 

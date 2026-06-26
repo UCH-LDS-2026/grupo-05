@@ -12,8 +12,9 @@ export class VisitsController {
   create(
     @Param('kioskId') kioskId: string,
     @Body('visitToken') visitToken: string,
+    @Body('visitCode') visitCode: string,
     @CurrentPlayer() player: AuthPlayer,
   ) {
-    return this.visits.create(player.id, kioskId, visitToken);
+    return this.visits.create(player.id, kioskId, { visitToken, visitCode });
   }
 }

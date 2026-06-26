@@ -170,6 +170,7 @@ export type OwnerVisitQrKiosk = {
   city: string;
   brand: string | null;
   visitToken: string;
+  visitCode: string;
 };
 
 export type OwnerVisitQrs = {
@@ -230,10 +231,10 @@ export const api = {
     }),
   kiosks: () => request<KioskListItem[]>('/kiosks'),
   kiosk: (id: string) => request<KioskDetail>(`/kiosks/${id}`),
-  addVisit: (id: string, visitToken: string) =>
+  addVisit: (id: string, proof: { visitToken?: string; visitCode?: string }) =>
     request<{ id: string; createdAt: string; totalVisits: number }>(
       `/kiosks/${id}/visits`,
-      { method: 'POST', body: JSON.stringify({ visitToken }) },
+      { method: 'POST', body: JSON.stringify(proof) },
     ),
   saveReview: (id: string, body: ReviewInput) =>
     request<ReviewItem>(`/kiosks/${id}/reviews`, {
