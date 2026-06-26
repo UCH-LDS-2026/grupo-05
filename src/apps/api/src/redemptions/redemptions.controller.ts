@@ -11,7 +11,6 @@ import { RedemptionsService } from './redemptions.service';
 export class RedemptionsController {
   constructor(private readonly redemptions: RedemptionsService) {}
 
-  /** GET /kiosks/:kioskId/promotions - promos elegibles para el player */
   @Get()
   eligible(
     @Param('kioskId') kioskId: string,
@@ -20,7 +19,6 @@ export class RedemptionsController {
     return this.redemptions.eligibleForKiosk(kioskId, player.id);
   }
 
-  /** POST /kiosks/:kioskId/promotions/:promotionId/redeem - inicia el canje */
   @Post(':promotionId/redeem')
   redeem(
     @Param('promotionId') promotionId: string,
@@ -36,9 +34,13 @@ export class RedemptionsController {
 export class OwnerRedemptionsController {
   constructor(private readonly redemptions: RedemptionsService) {}
 
-  /** POST /owner/redemptions/validate - owner valida un codigo en mostrador */
   @Post('validate')
   validate(@Body('code') code: string, @CurrentUser() owner: AuthUser) {
+    return this.redemptions.validateByOwner(code ?? '', owner.id);
+  }
+
+  @Post('redeem')
+  redeemByCode(@Body('code') code: string, @CurrentUser() owner: AuthUser) {
     return this.redemptions.validateByOwner(code ?? '', owner.id);
   }
 }

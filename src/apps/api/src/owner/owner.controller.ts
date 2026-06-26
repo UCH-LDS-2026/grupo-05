@@ -1,28 +1,28 @@
-import { Controller, Get, Post, Patch, Param, Body, UseGuards } from '@nestjs/common';
-import { OwnerService } from './owner.service';
+import { Body, Controller, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
+import { AuthUser, CurrentUser } from '../auth/current-user.decorator';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/roles.decorator';
-import { CurrentUser, AuthUser } from '../auth/current-user.decorator';
+import { RolesGuard } from '../auth/roles.guard';
 import { KioskUpsertDto } from './dto/kiosk.dto';
+import { OwnerService } from './owner.service';
 
-@Controller('owner/kiosks')
+@Controller('owner')
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles('OWNER')
 export class OwnerController {
   constructor(private readonly ownerService: OwnerService) {}
 
-  @Get()
+  @Get('kiosks')
   list(@CurrentUser() user: AuthUser) {
     return this.ownerService.getKiosks(user.id);
   }
 
-  @Post()
+  @Post('kiosks')
   create(@CurrentUser() user: AuthUser, @Body() dto: KioskUpsertDto) {
     return this.ownerService.createKiosk(user.id, dto);
   }
 
-  @Patch(':id')
+  @Patch('kiosks/:id')
   update(
     @CurrentUser() user: AuthUser,
     @Param('id') id: string,
@@ -31,8 +31,18 @@ export class OwnerController {
     return this.ownerService.updateKiosk(user.id, id, dto);
   }
 
-  @Get(':id/stats')
+  @Get('kiosks/:id/stats')
   stats(@CurrentUser() user: AuthUser, @Param('id') id: string) {
     return this.ownerService.getKioskStats(user.id, id);
+  }
+
+  @Get('reviews')
+  reviews(@CurrentUser() user: AuthUser) {
+    return this.ownerService.reviews(user.id);
+  }
+
+  @Get('visit-qrs')
+  visitQrs(@CurrentUser() user: AuthUser) {
+    return this.ownerService.visitQrs(user.id);
   }
 }

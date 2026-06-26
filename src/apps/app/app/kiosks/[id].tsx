@@ -28,6 +28,14 @@ function overall(r: { attention: number; variety: number; cleanliness: number; p
   return (r.attention + r.variety + r.cleanliness + r.prices + r.ambiance) / 5;
 }
 
+function formatDate(value: string) {
+  return new Intl.DateTimeFormat('es-AR', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  }).format(new Date(value));
+}
+
 export default function KioskDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
@@ -73,14 +81,11 @@ export default function KioskDetailScreen() {
   async function onVisit() {
     if (!id) return;
     setSavingVisit(true);
-    try {
-      await api.addVisit(id);
-      await load();
-    } catch (e: any) {
-      Alert.alert('Error', e?.message ?? 'No se pudo registrar la visita');
-    } finally {
-      setSavingVisit(false);
-    }
+    router.push({
+      pathname: '/kiosks/visit-scan',
+      params: { kioskId: id, kioskName: kiosk?.name ?? 'Kiosco' },
+    });
+    setSavingVisit(false);
   }
 
   async function onSaveReview() {
@@ -188,7 +193,7 @@ export default function KioskDetailScreen() {
         >
           <Ionicons name="add-circle-outline" size={20} color={colors.white} />
           <Text style={styles.visitBtnText}>
-            {savingVisit ? 'Registrando…' : 'Marcar visita'}
+            {savingVisit ? 'Abriendo…' : 'Marcar visita'}
           </Text>
         </Pressable>
       </View>
@@ -264,10 +269,24 @@ export default function KioskDetailScreen() {
           kiosk.reviews.map((r) => (
             <View key={r.id} style={styles.review}>
               <View style={styles.reviewHead}>
-                <Text style={styles.author}>{r.author}</Text>
-                <Stars value={overall(r)} size={14} />
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.author}>{r.author}</Text>
+                  <Text style={styles.reviewDate}>{formatDate(r.createdAt)}</Text>
+                </View>
+                <View style={styles.reviewScore}>
+                  <Stars value={overall(r)} size={14} />
+                  <Text style={styles.reviewScoreText}>{overall(r).toFixed(1)}</Text>
+                </View>
               </View>
               {r.comment && <Text style={styles.reviewComment}>{r.comment}</Text>}
+              <View style={styles.reviewCats}>
+                {CATS.map((cat) => (
+                  <View key={cat.key} style={styles.reviewCat}>
+                    <Text style={styles.reviewCatLabel}>{cat.label}</Text>
+                    <Text style={styles.reviewCatValue}>{r[cat.key]}/5</Text>
+                  </View>
+                ))}
+              </View>
             </View>
           ))
         )}
@@ -393,7 +412,22 @@ const styles = StyleSheet.create({
     paddingVertical: space.md,
     gap: 4,
   },
-  reviewHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  reviewHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: space.sm },
   author: { fontWeight: '700', color: colors.text },
+  reviewDate: { color: colors.muted, fontSize: 12, marginTop: 2 },
+  reviewScore: { alignItems: 'flex-end', gap: 2 },
+  reviewScoreText: { color: colors.text, fontSize: 12, fontWeight: '700' },
   reviewComment: { color: colors.navySoft, fontSize: 14, lineHeight: 20 },
+  reviewCats: { flexDirection: 'row', flexWrap: 'wrap', gap: space.xs, marginTop: space.xs },
+  reviewCat: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: colors.bg,
+    borderRadius: radius.sm,
+    paddingHorizontal: space.sm,
+    paddingVertical: 4,
+  },
+  reviewCatLabel: { color: colors.muted, fontSize: 12 },
+  reviewCatValue: { color: colors.text, fontSize: 12, fontWeight: '700' },
 });

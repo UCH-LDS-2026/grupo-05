@@ -11,7 +11,15 @@
       "bundler": "metro",
       "output": "single"
     },
-    "plugins": ["expo-router"],
+    "plugins": [
+      "expo-router",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Permití usar la cámara para escanear QR de canjes."
+        }
+      ]
+    ],
     "experiments": {
       "typedRoutes": false
     }
