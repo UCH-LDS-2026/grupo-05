@@ -91,7 +91,7 @@ export default function KiosksScreen() {
             <Text style={styles.retryText}>Reintentar</Text>
           </Pressable>
         </View>
-      ) : (
+      ) : viewMode === 'list' ? (
         <FlatList
           data={kiosks}
           keyExtractor={(k) => k.id}
