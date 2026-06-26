@@ -1,0 +1,199 @@
+<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+<head>
+<meta charset="utf-8">
+<title>Guía de Estudio y Defensa - Spot</title>
+<style>
+body { font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.6; color: #2d3748; margin: 40px; }
+h1 { color: #1a365d; border-bottom: 3px solid #1a365d; padding-bottom: 8px; font-size: 26pt; font-weight: bold; margin-bottom: 20px; }
+h2 { color: #dd6b20; font-size: 18pt; border-bottom: 1.5px solid #e2e8f0; padding-bottom: 5px; margin-top: 35px; margin-bottom: 15px; font-weight: bold; }
+h3 { color: #2b6cb0; font-size: 14pt; margin-top: 20px; margin-bottom: 10px; font-weight: bold; }
+p, li { font-size: 11pt; margin-bottom: 8px; }
+ul, ol { margin-bottom: 15px; padding-left: 20px; }
+code { font-family: Consolas, monospace; background-color: #f7fafc; color: #1a202c; padding: 2px 5px; border-radius: 3px; font-size: 10pt; border: 0.5px solid #e2e8f0; }
+pre { font-family: Consolas, monospace; background-color: #f7fafc; padding: 12px; border-left: 5px solid #2b6cb0; font-size: 9.5pt; display: block; margin: 15px 0; border-top: 0.5px solid #e2e8f0; border-right: 0.5px solid #e2e8f0; border-bottom: 0.5px solid #e2e8f0; }
+table { border-collapse: collapse; width: 100%; margin: 20px 0; }
+th, td { border: 1px solid #cbd5e0; padding: 10px; text-align: left; font-size: 10pt; }
+th { background-color: #edf2f7; color: #2b6cb0; font-weight: bold; }
+.badge { background-color: #edf2f7; color: #4a5568; padding: 2px 6px; border-radius: 4px; font-size: 9pt; font-weight: bold; }
+.alert-box { background-color: #fffaf0; border-left: 5px solid #dd6b20; padding: 12px; margin: 15px 0; font-size: 11pt; border-radius: 0 4px 4px 0; }
+.alert-title { font-weight: bold; color: #dd6b20; margin-bottom: 5px; }
+.success-box { background-color: #f0fff4; border-left: 5px solid #38a169; padding: 12px; margin: 15px 0; font-size: 11pt; border-radius: 0 4px 4px 0; }
+.success-title { font-weight: bold; color: #38a169; margin-bottom: 5px; }
+</style>
+</head>
+<body>
+
+<h1>GUÍA DE ESTUDIO Y DEFENSA DEL PROYECTO SPOT 🚀</h1>
+<p style="font-size: 13pt; color: #4a5568; font-style: italic; margin-bottom: 30px;">
+  Preparación para el Coloquio Académico — LDS (Grupo 5, UCH 2026)<br>
+  <strong>Estudiante:</strong> Joel (Responsable de Canjes y Validación)
+</p>
+
+<hr style="border: 0; border-top: 1px solid #e2e8f0; margin-bottom: 30px;">
+
+<h2>1. Resumen y Propósito del Proyecto (Pitch de Negocio)</h2>
+<p>
+  <strong>Spot</strong> es una plataforma de software bifronte (two-sided) diseñada para incentivar y digitalizar la fidelidad de los clientes en los kioscos tradicionales de barrio. Resuelve un problema de negocio claro: los sistemas de fidelización físicos (como las tarjetas de cartón con sellos) son fáciles de perder, difíciles de auditar y no proporcionan datos de consumo a los comerciantes.
+</p>
+<p>La plataforma interactúa con tres roles bien definidos:</p>
+<ul>
+  <li><strong>Jugadores (Players)</strong>: Clientes que a través de una aplicación móvil/web descubren kioscos, acumulan visitas mediante check-ins, dejan reseñas y canjean cupones de descuento o productos gratis.</li>
+  <li><strong>Propietarios (Owners)</strong>: Comerciantes que registran sus locales, consultan estadísticas de rendimiento y validan cupones de canje en el mostrador para entregar los premios.</li>
+  <li><strong>Administradores (Admins)</strong>: Moderadores que validan el alta de nuevos propietarios y gestionan la plataforma.</li>
+</ul>
+
+---
+
+<h2>2. Arquitectura General y Stack Tecnológico</h2>
+<p>El sistema se construyó bajo un enfoque de desarrollo ágil y profesional, utilizando las siguientes tecnologías:</p>
+<ul>
+  <li><strong>Monorepo</strong>: Administrado con <code>pnpm workspaces</code> para coordinar de forma limpia las dependencias y el código de la app móvil y del backend.</li>
+  <li><strong>Backend (API)</strong>: Desarrollado en <strong>NestJS</strong> (Node.js + TypeScript). Sigue una arquitectura modular escalable (módulos, controladores, servicios) y se conecta a la base de datos a través de <strong>Prisma ORM</strong>.</li>
+  <li><strong>Frontend (App)</strong>: Desarrollado con <strong>React Native + Expo Router</strong> para compilar una SPA (Single Page Application) responsiva que se ejecuta tanto en web como en dispositivos móviles.</li>
+  <li><strong>Base de Datos</strong>: <strong>PostgreSQL 16</strong>, una base de datos relacional robusta.</li>
+  <li><strong>Infraestructura</strong>: Orquestada mediante <strong>Docker Compose</strong>, aislando los servicios en contenedores para garantizar que la app funcione exactamente igual en desarrollo y producción.</li>
+</ul>
+
+---
+
+<h2>3. Diseño de Base de Datos y Modelo de Dominio</h2>
+<p>
+  La base de datos está compuesta por 11 entidades clave definidas en el archivo <code>schema.prisma</code>. 
+</p>
+
+<div class="alert-box">
+  <div class="alert-title">⚠️ Decisión de Diseño Clave: Mapeo de la Herencia de Usuarios</div>
+  En el modelo conceptual, <code>User</code> es una clase abstracta que heredan <code>Player</code>, <code>Owner</code> y <code>Admin</code>. Para mapearlo en la base de datos relacional PostgreSQL, se eligió la estrategia de <strong>Table-per-concrete-class</strong> (Tabla por clase concreta).
+  <br><br>
+  <strong>¿Por qué?</strong>
+  <ul>
+    <li>Evita columnas nulas en la base de datos (por ejemplo, el Player se autentica con código de invitación y no tiene contraseña, mientras que el Owner y el Admin sí).</li>
+    <li>Mantiene el Slice del Player simple, robusto y completamente aislado de los usuarios comerciales.</li>
+    <li>El rol del usuario se maneja directamente en el token de sesión (JWT) mediante el enum <code>Role</code> (<code>PLAYER</code> | <code>OWNER</code> | <code>ADMIN</code>).</li>
+  </ul>
+</div>
+
+<h3>Principales Entidades del Esquema:</h3>
+<table>
+  <thead>
+    <tr>
+      <th style="width: 25%">Entidad</th>
+      <th style="width: 25%">Relación / Multiplicidad</th>
+      <th>Descripción y Propósito</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Player</strong></td>
+      <td>1-1 con <code>InviteCode</code><br>1-N con <code>Visit</code>, <code>Review</code>, <code>Redemption</code></td>
+      <td>Usuario cliente. Se da de alta ingresando un código de invitación único.</td>
+    </tr>
+    <tr>
+      <td><strong>Owner</strong></td>
+      <td>1-N con <code>Kiosk</code></td>
+      <td>Dueño de los locales. Su estado por defecto es <code>PENDIENTE_VALIDACION</code> hasta que un admin lo aprueba.</td>
+    </tr>
+    <tr>
+      <td><strong>Kiosk</strong></td>
+      <td>N-1 con <code>Owner</code> (opcional)</td>
+      <td>Representa al kiosco físico. Puede no tener dueño asignado si fue precargado por el sistema.</td>
+    </tr>
+    <tr>
+      <td><strong>Visit</strong></td>
+      <td>N-1 con <code>Player</code> y <code>Kiosk</code></td>
+      <td>Registra cada check-in de un cliente. Sirve de insumo para evaluar el motor de promociones.</td>
+    </tr>
+    <tr>
+      <td><strong>Review</strong></td>
+      <td>Composición con <code>Player</code> y <code>Kiosk</code></td>
+      <td>Reseña con comentarios y puntuaciones del 1 al 5 en cinco dimensiones (atención, variedad, limpieza, precios, ambiente). Clave compuesta única por player/kiosco.</td>
+    </tr>
+    <tr>
+      <td><strong>Promotion</strong></td>
+      <td>1-N con <code>PromotionRule</code> y <code>Redemption</code></td>
+      <td>Definida por el Owner. Almacena vigencia, tipo de premio y topes (caps). Su ciclo de vida depende de sus reglas.</td>
+    </tr>
+    <tr>
+      <td><strong>Redemption</strong></td>
+      <td>N-1 con <code>Promotion</code> y <code>Player</code></td>
+      <td>Un canje individual. Contiene el código de 6 caracteres, estado (<code>PENDING</code> | <code>REDEEMED</code> | <code>EXPIRED</code>) y fecha de expiración.</td>
+    </tr>
+  </tbody>
+</table>
+
+---
+
+<h2>4. Tu Flujo: Ciclo del Canje y Validación (Joel)</h2>
+<p>
+  Como responsable del módulo de canjes, implementaste el ciclo de vida completo de un beneficio: desde que el cliente solicita el canje hasta que el dueño lo valida en el mostrador.
+</p>
+
+<h3>A. Generación del Código (Player)</h3>
+<p>
+  Cuando el cliente cumple las reglas en la app, puede presionar "Canjear". La app llama al endpoint <code>POST /kiosks/:kioskId/promotions/:promotionId/redeem</code>:
+</p>
+<ol>
+  <li>El servicio verifica que el player cumpla con las visitas mínimas del kiosco.</li>
+  <li>Genera un código corto único de 6 caracteres alfanuméricos (mayúsculas y números) para que sea fácil de dictar o escanear mediante código QR.</li>
+  <li>Establece una expiración de 10 minutos con estado inicial <code>PENDING</code>.</li>
+</ol>
+
+<h3>B. Validación en Mostrador (Owner)</h3>
+<p>
+  El cliente presenta su pantalla al kiosquero. El comerciante accede a la pantalla de validación en su panel e ingresa el código. Esto llama a <code>POST /owner/redemptions/validate</code>:
+</p>
+
+<div class="success-box">
+  <div class="success-title">🔒 Algoritmo de Validación Seguro y Consistente</div>
+  <ol>
+    <li><strong>Verificación de Cuenta</strong>: Se comprueba que la cuenta del comerciante tenga estado <code>VALIDADO</code>. Si es <code>PENDIENTE_VALIDACION</code>, se rechaza la operación.</li>
+    <li><strong>Asignación de Kiosco</strong>: Se comprueba que la promoción del canje pertenezca a un kiosco que sea propiedad del comerciante que consulta (evitando que dueños ajenos validen cupones).</li>
+    <li><strong>Verificación de Vencimiento</strong>: Si el cupón expiró, se cambia automáticamente el estado a <code>EXPIRED</code> y se cancela con error.</li>
+    <li><strong>Control de Doble Canje (Consistencia Atómica)</strong>: Para evitar condiciones de carrera, se actualiza el estado a <code>REDEEMED</code> de forma condicional mediante una transacción SQL única:
+      <pre>
+const update = await this.prisma.redemption.updateMany({
+  where: {
+    id: redemption.id,
+    status: 'PENDING',
+    redeemedAt: null,
+    expiresAt: { gt: now },
+  },
+  data: { status: 'REDEEMED', redeemedAt: now },
+});</pre>
+      Si <code>update.count</code> no es 1, significa que otra consulta concurrente ya procesó el cupón, y la API rechaza el pedido.
+    </li>
+  </ol>
+</div>
+
+---
+
+<h2>5. Flujos de Coordinación (Matías y Bauti)</h2>
+
+<h3>El Panel de Control del Dueño (Matías)</h3>
+<p>
+  Matías construyó la estructura visual del panel (rutas, contenedores, barras de navegación y formularios de kioscos) y el backend de estadísticas del negocio. Sus endpoints permiten ver en tarjetas grandes las visitas únicas y valoraciones del local. Tu pantalla de canje se monta dentro de este panel en la ruta <code>owner/kiosks/[id]/redemptions.tsx</code> de manera exacta.
+</p>
+
+<h3>El Motor de Promociones (Bauti)</h3>
+<p>
+  Bauti desarrolló la lógica que evalúa si un player es elegible para una promo basándose en reglas combinadas (AND) de frecuencia, montos y productos consumidos. Las promociones creadas mediante la UI de Bauti se transforman en los cupones que los clientes generan y que posteriormente vos validás en tu pantalla.
+</p>
+
+---
+
+<h2>6. Preguntas de Examen Preparadas (Estudio Rápido)</h2>
+
+<p><strong>P1: ¿Cómo garantizan que el sistema sea seguro ante accesos no autorizados?</strong></p>
+<p><em>Respuesta:</em> Usamos autenticación basada en tokens JWT con roles. En NestJS protegemos los endpoints con <code>@UseGuards(JwtAuthGuard, RolesGuard)</code> y filtramos según el rol del usuario (ej: <code>@Roles('OWNER')</code> o <code>@Roles('ADMIN')</code>). Además, en la base de datos validamos que los recursos (kioscos, canjes) pertenezcan al identificador del usuario firmado en el token.</p>
+
+<p><strong>P2: ¿Por qué usaron Docker Compose y qué servicios contiene?</strong></p>
+<p><em>Respuesta:</em> Docker Compose nos permite levantar todo el ecosistema de la aplicación en cualquier máquina con un solo comando. Contiene 4 servicios: <code>db</code> (PostgreSQL), <code>api</code> (NestJS), <code>app</code> (Expo corriendo en Node) y <code>pgweb</code> (herramienta web para visualizar y auditar las tablas de la base de datos de manera visual).</p>
+
+<p><strong>P3: ¿Qué pruebas automatizadas escribieron para asegurar la calidad?</strong></p>
+<p><em>Respuesta:</em> Desarrollamos pruebas en tres niveles. En el backend, escribimos <strong>tests unitarios</strong> aislando los servicios mediante mocks de Prisma, y <strong>tests e2e (end-to-end)</strong> que corren la API real contra una base de datos de pruebas real en Docker. En el frontend, escribimos tests de componentes con Jest para comprobar que los elementos interactivos se dibujen y reaccionen de forma correcta.</p>
+
+<p><strong>P4: ¿Cómo manejan los finales de línea (CRLF) al trabajar en Windows y desplegar en Linux?</strong></p>
+<p><em>Respuesta:</em> Windows usa finales de línea CRLF (\r\n) y Linux usa LF (\n). Como las imágenes de Docker corren en Linux, configuramos en el Dockerfile de la API un comando <code>RUN sed -i 's/\r$//' ...</code> para limpiar los caracteres de Windows del script de entrada (docker-entrypoint.sh) antes de ejecutarlo. Esto evita que los contenedores fallen al iniciar.</p>
+
+</body>
+</html>
