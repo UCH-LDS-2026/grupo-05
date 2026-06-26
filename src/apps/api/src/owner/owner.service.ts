@@ -1,7 +1,9 @@
-import { Injectable, ForbiddenException, NotFoundException } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
-import { KioskUpsertDto } from './dto/kiosk.dto';
+import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { Review } from '@prisma/client';
+import { PrismaService } from '../prisma/prisma.service';
+import { createVisitQrToken, todayKey } from '../visits/visit-qr';
+import { KioskUpsertDto } from './dto/kiosk.dto';
 
 type RatingCats = Pick<
   Review,
@@ -10,17 +12,25 @@ type RatingCats = Pick<
 
 @Injectable()
 export class OwnerService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly config: ConfigService,
+  ) {}
+
+  private ratingValue(r: RatingCats): number {
+    return (
+      r.attention + r.variety + r.cleanliness + r.prices + r.ambiance
+    ) / 5;
+  }
 
   private overall(reviews: RatingCats[]): number | null {
     if (reviews.length === 0) return null;
-    const sum = reviews.reduce(
-      (acc, r) =>
-        acc +
-        (r.attention + r.variety + r.cleanliness + r.prices + r.ambiance) / 5,
-      0,
-    );
-    return Math.round((sum / reviews.length) * 10) / 10;
+    const sum = reviews.reduce((acc, review) => acc + this.ratingValue(review), 0);
+    return this.rounded(sum / reviews.length);
+  }
+
+  private rounded(value: number): number {
+    return Math.round(value * 10) / 10;
   }
 
   async checkOwnerStatus(ownerId: string) {
@@ -57,7 +67,7 @@ export class OwnerService {
     await this.checkOwnerStatus(ownerId);
     const kiosk = await this.prisma.kiosk.findUnique({ where: { id: kioskId } });
     if (!kiosk || kiosk.ownerId !== ownerId) {
-      throw new ForbiddenException('No puedes editar este kiosco');
+      throw new ForbiddenException('No podés editar este kiosco');
     }
     return this.prisma.kiosk.update({
       where: { id: kioskId },
@@ -89,14 +99,13 @@ export class OwnerService {
     });
 
     if (!kiosk || kiosk.ownerId !== ownerId) {
-      throw new ForbiddenException('No tienes acceso a este kiosco');
+      throw new ForbiddenException('No tenés acceso a este kiosco');
     }
 
     const visitors = await this.prisma.visit.groupBy({
       by: ['playerId'],
       where: { kioskId },
     });
-    const uniqueVisitors = visitors.length;
 
     const redemptionCount = await this.prisma.redemption.count({
       where: {
@@ -107,10 +116,89 @@ export class OwnerService {
 
     return {
       kioskId,
-      uniqueVisitors,
+      uniqueVisitors: visitors.length,
       avgRating: this.overall(kiosk.reviews),
       reviewCount: kiosk.reviews.length,
       redemptionCount,
     };
+  }
+
+  async reviews(ownerId: string) {
+    const kiosks = await this.prisma.kiosk.findMany({
+      where: { ownerId },
+      orderBy: { name: 'asc' },
+      include: {
+        reviews: {
+          orderBy: { createdAt: 'desc' },
+          include: { player: { select: { id: true, name: true } } },
+        },
+      },
+    });
+
+    const flatReviews = kiosks.flatMap((kiosk) => kiosk.reviews);
+    const avgRating =
+      flatReviews.length === 0
+        ? null
+        : this.rounded(
+            flatReviews.reduce((sum, review) => sum + this.ratingValue(review), 0) /
+              flatReviews.length,
+          );
+
+    return {
+      summary: {
+        kioskCount: kiosks.length,
+        reviewCount: flatReviews.length,
+        avgRating,
+      },
+      kiosks: kiosks.map((kiosk) => ({
+        id: kiosk.id,
+        name: kiosk.name,
+        address: kiosk.address,
+        city: kiosk.city,
+        brand: kiosk.brand,
+        reviewCount: kiosk.reviews.length,
+        avgRating: this.overall(kiosk.reviews),
+        reviews: kiosk.reviews.map((review) => ({
+          id: review.id,
+          author: review.player.name,
+          playerId: review.player.id,
+          attention: review.attention,
+          variety: review.variety,
+          cleanliness: review.cleanliness,
+          prices: review.prices,
+          ambiance: review.ambiance,
+          comment: review.comment,
+          createdAt: review.createdAt,
+          updatedAt: review.updatedAt,
+        })),
+      })),
+    };
+  }
+
+  async visitQrs(ownerId: string) {
+    const kiosks = await this.prisma.kiosk.findMany({
+      where: { ownerId },
+      orderBy: { name: 'asc' },
+      select: {
+        id: true,
+        name: true,
+        address: true,
+        city: true,
+        brand: true,
+      },
+    });
+
+    const secret = this.qrSecret();
+    return {
+      date: todayKey(),
+      kiosks: kiosks.map((kiosk) => ({
+        ...kiosk,
+        visitToken: createVisitQrToken(kiosk.id, secret),
+      })),
+    };
+  }
+
+  private qrSecret() {
+    return this.config.get<string>('VISIT_QR_SECRET') ?? this.config.get<string>('JWT_SECRET') ?? 'dev-secret';
   }
 }

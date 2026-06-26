@@ -41,6 +41,7 @@ export type KioskListItem = {
 export type ReviewItem = {
   id: string;
   author: string;
+  playerId?: string;
   attention: number;
   variety: number;
   cleanliness: number;
@@ -48,6 +49,7 @@ export type ReviewItem = {
   ambiance: number;
   comment: string | null;
   createdAt: string;
+  updatedAt?: string;
 };
 
 // Promo evaluada por el motor para un player: incluye estado de elegibilidad
@@ -103,6 +105,8 @@ export type RedemptionValidation = {
   };
 };
 
+export type RedemptionRedeemed = RedemptionValidation;
+
 export type KioskDetail = KioskListItem & {
   myVisits: number;
   myReview: (ReviewItem & { playerId: string }) | null;
@@ -137,6 +141,40 @@ export type KioskStats = {
   avgRating: number | null;
   reviewCount: number;
   redemptionCount: number;
+};
+
+export type OwnerReviewKiosk = {
+  id: string;
+  name: string;
+  address: string;
+  city: string;
+  brand: string | null;
+  reviewCount: number;
+  avgRating: number | null;
+  reviews: ReviewItem[];
+};
+
+export type OwnerReviews = {
+  summary: {
+    kioskCount: number;
+    reviewCount: number;
+    avgRating: number | null;
+  };
+  kiosks: OwnerReviewKiosk[];
+};
+
+export type OwnerVisitQrKiosk = {
+  id: string;
+  name: string;
+  address: string;
+  city: string;
+  brand: string | null;
+  visitToken: string;
+};
+
+export type OwnerVisitQrs = {
+  date: string;
+  kiosks: OwnerVisitQrKiosk[];
 };
 
 // --- Tipos de Admin ---
@@ -178,7 +216,7 @@ export type PromotionInput = {
 
 export type PromotionRuleItem = PromotionRuleInput & { id: string; promotionId: string };
 
-export type PromotionItem = PromotionInput & {
+export type PromotionItem = Omit<PromotionInput, 'rules'> & {
   id: string;
   createdAt: string;
   rules: PromotionRuleItem[];
@@ -192,10 +230,10 @@ export const api = {
     }),
   kiosks: () => request<KioskListItem[]>('/kiosks'),
   kiosk: (id: string) => request<KioskDetail>(`/kiosks/${id}`),
-  addVisit: (id: string) =>
+  addVisit: (id: string, visitToken: string) =>
     request<{ id: string; createdAt: string; totalVisits: number }>(
       `/kiosks/${id}/visits`,
-      { method: 'POST' },
+      { method: 'POST', body: JSON.stringify({ visitToken }) },
     ),
   saveReview: (id: string, body: ReviewInput) =>
     request<ReviewItem>(`/kiosks/${id}/reviews`, {
@@ -230,8 +268,15 @@ export const api = {
     }),
   ownerKioskStats: (id: string) =>
     request<KioskStats>(`/owner/kiosks/${id}/stats`),
+  ownerReviews: () => request<OwnerReviews>('/owner/reviews'),
+  ownerVisitQrs: () => request<OwnerVisitQrs>('/owner/visit-qrs'),
   validateRedemption: (code: string) =>
     request<RedemptionValidation>('/owner/redemptions/validate', {
+      method: 'POST',
+      body: JSON.stringify({ code }),
+    }),
+  ownerRedeemCode: (code: string) =>
+    request<RedemptionRedeemed>('/owner/redemptions/redeem', {
       method: 'POST',
       body: JSON.stringify({ code }),
     }),

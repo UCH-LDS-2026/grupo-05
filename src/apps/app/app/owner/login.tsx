@@ -1,8 +1,8 @@
 import { Link, useRouter } from 'expo-router';
 import { useState } from 'react';
-import { ActivityIndicator, KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, TextInput, View, Alert } from 'react-native';
+import { ActivityIndicator, Alert, KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { api } from '../../lib/api';
-import { saveSession } from '../../lib/storage';
+import { saveOwnerSession } from '../../lib/storage';
 import { colors, radius, space } from '../../theme';
 
 export default function OwnerLogin() {
@@ -22,11 +22,12 @@ export default function OwnerLogin() {
     try {
       const res = await api.ownerLogin(email.trim(), password.trim()) as any;
       const owner = res.owner;
-      saveSession(res.token, { id: owner.id, name: owner.name });
+      saveOwnerSession(res.token, owner);
       if (owner.status === 'PENDIENTE_VALIDACION') {
         router.replace('/owner/validation');
       } else {
-        router.replace('/owner');
+        Alert.alert('Éxito', 'Login exitoso y cuenta validada.');
+        router.replace('/owner/reviews');
       }
     } catch (e: any) {
       setError(e?.message ?? 'Credenciales inválidas');
@@ -68,20 +69,18 @@ export default function OwnerLogin() {
           {loading ? <ActivityIndicator color={colors.white} /> : <Text style={styles.buttonText}>Ingresar</Text>}
         </Pressable>
 
-        <View style={{ marginTop: space.lg, alignItems: 'center' }}>
-          <Link href="/owner/register" asChild>
-            <Pressable>
-              <Text style={{ color: colors.primary, fontWeight: '600' }}>¿No tenés cuenta? Registrate</Text>
-            </Pressable>
-          </Link>
-        </View>
+        <Link href="/owner/register" asChild>
+          <Pressable style={styles.linkBtn}>
+            <Text style={styles.linkText}>Crear cuenta de dueño</Text>
+          </Pressable>
+        </Link>
       </View>
     </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.bg, padding: space.xl, justifyContent: 'center' },
+  container: { flex: 1, backgroundColor: colors.bg, justifyContent: 'center', padding: space.xl },
   card: { backgroundColor: colors.card, borderRadius: radius.lg, padding: space.xl, gap: space.xs },
   title: { fontSize: 22, fontWeight: '700', color: colors.text },
   subtitle: { fontSize: 14, color: colors.muted, marginBottom: space.md },
@@ -90,4 +89,6 @@ const styles = StyleSheet.create({
   error: { color: colors.danger, marginTop: space.sm, fontSize: 14 },
   button: { backgroundColor: colors.primary, borderRadius: radius.md, paddingVertical: space.md + 2, alignItems: 'center', marginTop: space.lg },
   buttonText: { color: colors.white, fontSize: 17, fontWeight: '700' },
+  linkBtn: { alignItems: 'center', paddingVertical: space.md },
+  linkText: { color: colors.primary, fontWeight: '700' },
 });

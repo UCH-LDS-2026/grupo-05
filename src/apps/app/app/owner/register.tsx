@@ -2,6 +2,7 @@ import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { ActivityIndicator, KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, TextInput, View, ScrollView } from 'react-native';
 import { api } from '../../lib/api';
+import { saveOwnerSession } from '../../lib/storage';
 import { colors, radius, space } from '../../theme';
 
 export default function OwnerRegister() {
@@ -22,11 +23,12 @@ export default function OwnerRegister() {
     try {
       const res = await api.ownerRegister(name.trim(), email.trim(), password.trim()) as any;
       const owner = res.owner;
+      saveOwnerSession(res.token, owner);
 
       if (owner.status === 'PENDIENTE_VALIDACION') {
         router.replace('/owner/validation');
       } else {
-        router.replace('/owner/login');
+        router.replace('/owner/reviews');
       }
     } catch (e: any) {
       setError(e?.message ?? 'Error al registrarte');

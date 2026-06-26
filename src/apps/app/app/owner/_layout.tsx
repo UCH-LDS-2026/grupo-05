@@ -8,6 +8,9 @@ export default function OwnerLayout() {
       <Stack.Screen name="validation" options={{ headerShown: false }} />
       <Stack.Screen name="index" options={{ title: 'Panel Owner', headerShown: false }} />
       <Stack.Screen name="kiosks" options={{ headerShown: false }} />
+      <Stack.Screen name="reviews" options={{ title: 'Reseñas', headerShown: true }} />
+      <Stack.Screen name="redeem" options={{ title: 'Validar canje', headerShown: true }} />
+      <Stack.Screen name="visit-qrs" options={{ title: 'QR de visitas', headerShown: true }} />
     </Stack>
   );
 }

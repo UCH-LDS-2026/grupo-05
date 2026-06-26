@@ -66,6 +66,9 @@ export default function OwnerPromotions() {
   useEffect(() => {
     if (kioskId) {
       loadPromotions();
+    } else {
+      setError('Kiosco no encontrado');
+      setLoading(false);
     }
   }, [kioskId]);
 

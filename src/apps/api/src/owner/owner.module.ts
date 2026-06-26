@@ -1,11 +1,11 @@
 import { Module } from '@nestjs/common';
-import { OwnerService } from './owner.service';
-import { OwnerController } from './owner.controller';
-import { PrismaModule } from '../prisma/prisma.module';
 import { AuthModule } from '../auth/auth.module';
+import { PrismaModule } from '../prisma/prisma.module';
+import { OwnerController } from './owner.controller';
+import { OwnerService } from './owner.service';
 
 @Module({
-  imports: [PrismaModule, AuthModule],
+  imports: [AuthModule, PrismaModule],
   controllers: [OwnerController],
   providers: [OwnerService],
 })
