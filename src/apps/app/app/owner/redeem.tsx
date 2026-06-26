@@ -100,12 +100,12 @@ export default function OwnerRedeemScreen() {
 
   async function openScanner() {
     setScannerError(null);
+    if (cameraAvailable === null) {
+      setScannerError('No se pudo confirmar la cámara. Ingresá el código manualmente.');
+      return;
+    }
     if (cameraAvailable === false) {
-      setScannerError(
-        Platform.OS === 'web'
-          ? 'No se encontró una cámara disponible. Ingresá el código manualmente.'
-          : 'No se encontró una cámara disponible. Ingresá el código manualmente.',
-      );
+      setScannerError('No se encontró una cámara disponible. Ingresá el código manualmente.');
       return;
     }
     if (!permission?.granted) {
