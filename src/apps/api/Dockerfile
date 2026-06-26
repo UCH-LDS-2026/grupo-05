@@ -23,9 +23,10 @@ RUN cd src/apps/api \
   && pnpm exec nest build
 
 COPY src/apps/api/docker-entrypoint.sh /usr/local/bin/spot-entrypoint.sh
-RUN chmod +x /usr/local/bin/spot-entrypoint.sh
+RUN sed -i 's/\r$//' /usr/local/bin/spot-entrypoint.sh \
+  && chmod +x /usr/local/bin/spot-entrypoint.sh
 
 EXPOSE 3001
 
 # El entrypoint aplica migraciones, hace seed la 1ª vez y arranca el server.
-ENTRYPOINT ["spot-entrypoint.sh"]
+ENTRYPOINT ["/usr/local/bin/spot-entrypoint.sh"]

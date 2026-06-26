@@ -1,6 +1,8 @@
 import { getToken, Player } from './storage';
 
-const BASE = process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:3001';
+declare const process: { env?: Record<string, string | undefined> };
+
+const BASE = process.env?.EXPO_PUBLIC_API_URL ?? 'http://localhost:3001';
 
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   const token = getToken();
@@ -77,6 +79,28 @@ export type RedemptionStart = {
   };
 };
 
+export type RedemptionValidation = {
+  redemptionId: string;
+  code: string;
+  status: 'REDEEMED';
+  expiresAt: string;
+  redeemedAt: string | null;
+  player: {
+    id: string;
+    name: string;
+  };
+  promotion: {
+    id: string;
+    title: string;
+    description: string | null;
+    rewardType: 'FREE_PRODUCT' | 'DISCOUNT_PCT' | 'DISCOUNT_AMOUNT' | 'TWO_FOR_ONE';
+    rewardValue: number | null;
+    rewardProduct: string | null;
+    kioskId: string;
+    kioskName: string;
+  };
+};
+
 export type KioskDetail = KioskListItem & {
   myVisits: number;
   myReview: (ReviewItem & { playerId: string }) | null;
@@ -92,6 +116,36 @@ export type ReviewInput = {
   ambiance: number;
   comment?: string;
 };
+
+// --- Tipos de Owner ---
+export type KioskUpsert = {
+  name: string;
+  address: string;
+  city?: string;
+  brand?: string | null;
+  lat?: number | null;
+  lng?: number | null;
+};
+
+export type OwnerKioskItem = KioskUpsert & { id: string; ownerId: string };
+
+export type KioskStats = {
+  kioskId: string;
+  uniqueVisitors: number;
+  avgRating: number | null;
+  reviewCount: number;
+  redemptionCount: number;
+};
+
+// --- Tipos de Admin ---
+export type AdminOwnerItem = {
+  id: string;
+  name: string;
+  email: string;
+  status: 'PENDIENTE_VALIDACION' | 'VALIDADO' | 'RECHAZADO';
+  createdAt: string;
+};
+
 
 export const api = {
   login: (code: string, name?: string) =>
@@ -125,5 +179,33 @@ export const api = {
     request('/auth/owner/login', {
       method: 'POST',
       body: JSON.stringify({ email, password }),
+    }),
+  ownerKiosks: () => request<OwnerKioskItem[]>('/owner/kiosks'),
+  ownerCreateKiosk: (body: KioskUpsert) =>
+    request<OwnerKioskItem>('/owner/kiosks', {
+      method: 'POST',
+      body: JSON.stringify(body),
+    }),
+  ownerUpdateKiosk: (id: string, body: KioskUpsert) =>
+    request<OwnerKioskItem>(`/owner/kiosks/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(body),
+    }),
+  ownerKioskStats: (id: string) =>
+    request<KioskStats>(`/owner/kiosks/${id}/stats`),
+  validateRedemption: (code: string) =>
+    request<RedemptionValidation>('/owner/redemptions/validate', {
+      method: 'POST',
+      body: JSON.stringify({ code }),
+    }),
+  adminLogin: (email: string, password: string) =>
+    request('/auth/admin/login', {
+      method: 'POST',
+      body: JSON.stringify({ email, password }),
+    }),
+  adminOwners: () => request<AdminOwnerItem[]>('/admin/owners'),
+  adminValidateOwner: (id: string) =>
+    request<AdminOwnerItem>(`/admin/owners/${id}/validate`, {
+      method: 'PATCH',
     }),
 };
