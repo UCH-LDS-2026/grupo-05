@@ -1,8 +1,8 @@
 import { Ionicons } from '@expo/vector-icons';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useRef, useState } from 'react';
-import { ActivityIndicator, Alert, Pressable, StyleSheet, Text, View } from 'react-native';
+import { useEffect, useRef, useState } from 'react';
+import { ActivityIndicator, Alert, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import { api } from '../../lib/api';
 import { colors, radius, space } from '../../theme';
 
@@ -23,7 +23,30 @@ export default function VisitScanScreen() {
   const { kioskId, kioskName } = useLocalSearchParams<{ kioskId: string; kioskName?: string }>();
   const [permission, requestPermission] = useCameraPermissions();
   const [submitting, setSubmitting] = useState(false);
+  const [cameraError, setCameraError] = useState<string | null>(null);
+  const [cameraAvailable, setCameraAvailable] = useState<boolean | null>(null);
   const scanLocked = useRef(false);
+
+  useEffect(() => {
+    let mounted = true;
+    CameraView.isAvailableAsync()
+      .then((available) => {
+        if (mounted) setCameraAvailable(available);
+      })
+      .catch(() => {
+        if (mounted) setCameraAvailable(false);
+      });
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (permission === null) {
+      void requestPermission();
+    }
+  }, [permission, requestPermission]);
 
   async function submit(raw: string) {
     if (!kioskId) return;
@@ -48,10 +71,20 @@ export default function VisitScanScreen() {
   }
 
   async function requestCamera() {
+    setCameraError(null);
     const next = await requestPermission();
     if (!next.granted) {
       Alert.alert('Permiso requerido', 'Necesitás habilitar la cámara para escanear el QR.');
     }
+  }
+
+  if (permission === null || cameraAvailable === null) {
+    return (
+      <View style={styles.permissionScreen}>
+        <ActivityIndicator color={colors.primary} size="large" />
+        <Text style={styles.permissionText}>Preparando la cámara...</Text>
+      </View>
+    );
   }
 
   if (!permission?.granted) {
@@ -69,12 +102,31 @@ export default function VisitScanScreen() {
     );
   }
 
+  if (cameraAvailable === false || cameraError) {
+    return (
+      <View style={styles.permissionScreen}>
+        <Ionicons name="alert-circle-outline" size={42} color={colors.navy} />
+        <Text style={styles.permissionTitle}>No se pudo abrir la cámara</Text>
+        <Text style={styles.permissionText}>
+          {cameraError ??
+            (Platform.OS === 'web'
+              ? 'Revisá que el navegador tenga cámara disponible y que la app esté abierta en localhost o HTTPS.'
+              : 'Revisá los permisos de cámara del dispositivo e intentá de nuevo.')}
+        </Text>
+        <Pressable style={styles.primaryButton} onPress={requestCamera}>
+          <Text style={styles.primaryButtonText}>Reintentar</Text>
+        </Pressable>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       <CameraView
         style={styles.camera}
         facing="back"
         barcodeScannerSettings={{ barcodeTypes: ['qr'] }}
+        onMountError={({ message }) => setCameraError(message || 'La cámara no pudo iniciar.')}
         onBarcodeScanned={({ data }) => {
           if (scanLocked.current || submitting) return;
           scanLocked.current = true;
