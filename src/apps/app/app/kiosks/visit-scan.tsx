@@ -1,5 +1,4 @@
 import { Ionicons } from '@expo/vector-icons';
-import { CameraView, useCameraPermissions } from 'expo-camera';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Alert, Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
@@ -21,19 +20,31 @@ function extractVisitToken(raw: string) {
 export default function VisitScanScreen() {
   const router = useRouter();
   const { kioskId, kioskName } = useLocalSearchParams<{ kioskId: string; kioskName?: string }>();
-  const [permission, requestPermission] = useCameraPermissions();
   const [submitting, setSubmitting] = useState(false);
   const [cameraError, setCameraError] = useState<string | null>(null);
   const [cameraAvailable, setCameraAvailable] = useState<boolean | null>(null);
+  const [cameraModule, setCameraModule] = useState<any>(null);
+  const [cameraPermissionGranted, setCameraPermissionGranted] = useState(false);
   const [manualMode, setManualMode] = useState(false);
   const [visitCode, setVisitCode] = useState('');
   const scanLocked = useRef(false);
 
   useEffect(() => {
     let mounted = true;
-    CameraView.isAvailableAsync()
-      .then((available) => {
-        if (mounted) setCameraAvailable(available);
+
+    if (Platform.OS === 'web') {
+      setCameraAvailable(false);
+      setManualMode(true);
+      return () => {
+        mounted = false;
+      };
+    }
+
+    import('expo-camera')
+      .then(async (module) => {
+        if (!mounted) return;
+        setCameraModule(module);
+        setCameraAvailable(await module.CameraView.isAvailableAsync());
       })
       .catch(() => {
         if (mounted) setCameraAvailable(false);
@@ -43,12 +54,6 @@ export default function VisitScanScreen() {
       mounted = false;
     };
   }, []);
-
-  useEffect(() => {
-    if (permission === null) {
-      void requestPermission();
-    }
-  }, [permission, requestPermission]);
 
   async function submitVisit(proof: { visitToken?: string; visitCode?: string }) {
     if (!kioskId) return;
@@ -87,13 +92,22 @@ export default function VisitScanScreen() {
 
   async function requestCamera() {
     setCameraError(null);
-    const next = await requestPermission();
+    if (!cameraModule) {
+      setCameraError('No se encontró una cámara disponible.');
+      setManualMode(true);
+      return;
+    }
+    const next = await cameraModule.requestCameraPermissionsAsync();
     if (!next.granted) {
       Alert.alert('Permiso requerido', 'Necesitás habilitar la cámara para escanear el QR.');
+      setManualMode(true);
+      return;
     }
+    setCameraPermissionGranted(true);
+    setManualMode(false);
   }
 
-  if (permission === null || cameraAvailable === null) {
+  if (cameraAvailable === null) {
     return (
       <View style={styles.permissionScreen}>
         <ActivityIndicator color={colors.primary} size="large" />
@@ -108,7 +122,7 @@ export default function VisitScanScreen() {
     );
   }
 
-  if (manualMode || !permission?.granted) {
+  if (manualMode || !cameraPermissionGranted) {
     return (
       <View style={styles.permissionScreen}>
         <Ionicons name="camera-outline" size={42} color={colors.navy} />
@@ -122,7 +136,7 @@ export default function VisitScanScreen() {
           onSubmit={submitManualCode}
           submitting={submitting}
         />
-        {!permission?.granted ? (
+        {!cameraPermissionGranted ? (
           <Pressable style={styles.secondaryButton} onPress={requestCamera}>
             <Text style={styles.secondaryButtonText}>Habilitar cámara</Text>
           </Pressable>
@@ -159,19 +173,25 @@ export default function VisitScanScreen() {
     );
   }
 
+  const CameraComponent = cameraModule?.CameraView;
+
   return (
     <View style={styles.container}>
-      <CameraView
-        style={styles.camera}
-        facing="back"
-        barcodeScannerSettings={{ barcodeTypes: ['qr'] }}
-        onMountError={({ message }) => setCameraError(message || 'La cámara no pudo iniciar.')}
-        onBarcodeScanned={({ data }) => {
-          if (scanLocked.current || submitting) return;
-          scanLocked.current = true;
-          void submitScan(data);
-        }}
-      />
+      {CameraComponent ? (
+        <CameraComponent
+          style={styles.camera}
+          facing="back"
+          barcodeScannerSettings={{ barcodeTypes: ['qr'] }}
+          onMountError={({ message }: { message?: string }) =>
+            setCameraError(message || 'La cámara no pudo iniciar.')
+          }
+          onBarcodeScanned={({ data }: { data: string }) => {
+            if (scanLocked.current || submitting) return;
+            scanLocked.current = true;
+            void submitScan(data);
+          }}
+        />
+      ) : null}
       <View style={styles.overlay}>
         <View style={styles.topCard}>
           <Text style={styles.eyebrow}>Marcar visita</Text>

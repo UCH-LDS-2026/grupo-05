@@ -1,4 +1,3 @@
-import { CameraView, useCameraPermissions } from 'expo-camera';
 import { useRouter } from 'expo-router';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
@@ -42,22 +41,33 @@ function extractCode(raw: string) {
 
 export default function OwnerRedeemScreen() {
   const router = useRouter();
-  const [permission, requestPermission] = useCameraPermissions();
   const [code, setCode] = useState('');
   const [scanning, setScanning] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [result, setResult] = useState<RedemptionRedeemed | null>(null);
   const [scannerError, setScannerError] = useState<string | null>(null);
   const [cameraAvailable, setCameraAvailable] = useState<boolean | null>(null);
+  const [cameraModule, setCameraModule] = useState<any>(null);
+  const [cameraPermissionGranted, setCameraPermissionGranted] = useState(false);
   const scanLocked = useRef(false);
 
   const normalizedCode = useMemo(() => extractCode(code), [code]);
 
   useEffect(() => {
     let mounted = true;
-    CameraView.isAvailableAsync()
-      .then((available) => {
-        if (mounted) setCameraAvailable(available);
+
+    if (Platform.OS === 'web') {
+      setCameraAvailable(false);
+      return () => {
+        mounted = false;
+      };
+    }
+
+    import('expo-camera')
+      .then(async (module) => {
+        if (!mounted) return;
+        setCameraModule(module);
+        setCameraAvailable(await module.CameraView.isAvailableAsync());
       })
       .catch(() => {
         if (mounted) setCameraAvailable(false);
@@ -104,33 +114,43 @@ export default function OwnerRedeemScreen() {
       setScannerError('No se pudo confirmar la cámara. Ingresá el código manualmente.');
       return;
     }
-    if (cameraAvailable === false) {
+    if (cameraAvailable === false || !cameraModule) {
       setScannerError('No se encontró una cámara disponible. Ingresá el código manualmente.');
       return;
     }
-    if (!permission?.granted) {
-      const next = await requestPermission();
+    if (!cameraPermissionGranted) {
+      const next = await cameraModule.requestCameraPermissionsAsync();
       if (!next.granted) {
         setScannerError('Permiso de cámara denegado. Ingresá el código manualmente.');
         return;
       }
+      setCameraPermissionGranted(true);
     }
     scanLocked.current = false;
     setScanning(true);
   }
 
   if (scanning) {
+    const CameraComponent = cameraModule?.CameraView;
+    if (!CameraComponent) {
+      return (
+        <View style={styles.container}>
+          <Text style={styles.fallbackText}>No se pudo abrir la cámara. Ingresá el código manualmente.</Text>
+        </View>
+      );
+    }
+
     return (
       <View style={styles.scannerScreen}>
-        <CameraView
+        <CameraComponent
           style={styles.camera}
           facing="back"
           barcodeScannerSettings={{ barcodeTypes: ['qr'] }}
-          onMountError={({ message }) => {
+          onMountError={({ message }: { message?: string }) => {
             setScannerError(message || 'La cámara no pudo iniciar. Ingresá el código manualmente.');
             setScanning(false);
           }}
-          onBarcodeScanned={({ data }) => {
+          onBarcodeScanned={({ data }: { data: string }) => {
             if (scanLocked.current || submitting) return;
             scanLocked.current = true;
             void confirmCode(data);
