@@ -22,9 +22,7 @@ export default function OwnerLogin() {
     try {
       const res = await api.ownerLogin(email.trim(), password.trim()) as any;
       const owner = res.owner;
-      
       saveSession(res.token, { id: owner.id, name: owner.name });
-      
       if (owner.status === 'PENDIENTE_VALIDACION') {
         router.replace('/owner/validation');
       } else {

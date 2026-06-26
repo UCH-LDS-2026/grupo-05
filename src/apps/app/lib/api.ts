@@ -1,6 +1,8 @@
 import { getToken, Player } from './storage';
 
-const BASE = process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:3001';
+declare const process: { env?: Record<string, string | undefined> };
+
+const BASE = process.env?.EXPO_PUBLIC_API_URL ?? 'http://localhost:3001';
 
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   const token = getToken();
@@ -32,6 +34,8 @@ export type KioskListItem = {
   visitCount: number;
   reviewCount: number;
   avgRating: number | null;
+  lat?: number | null;
+  lng?: number | null;
 };
 
 export type ReviewItem = {
@@ -73,6 +77,28 @@ export type RedemptionStart = {
     id: string;
     title: string;
     description: string | null;
+    kioskName: string;
+  };
+};
+
+export type RedemptionValidation = {
+  redemptionId: string;
+  code: string;
+  status: 'REDEEMED';
+  expiresAt: string;
+  redeemedAt: string | null;
+  player: {
+    id: string;
+    name: string;
+  };
+  promotion: {
+    id: string;
+    title: string;
+    description: string | null;
+    rewardType: 'FREE_PRODUCT' | 'DISCOUNT_PCT' | 'DISCOUNT_AMOUNT' | 'TWO_FOR_ONE';
+    rewardValue: number | null;
+    rewardProduct: string | null;
+    kioskId: string;
     kioskName: string;
   };
 };
@@ -122,6 +148,41 @@ export type AdminOwnerItem = {
   createdAt: string;
 };
 
+export type PromotionRuleInput = {
+  type: 'FREQUENCY' | 'AMOUNT' | 'PRODUCTS';
+  minVisits?: number;
+  minAmount?: number;
+  windowDays?: number;
+  products?: string[];
+};
+
+export type PromotionInput = {
+  kioskId: string;
+  title: string;
+  description?: string;
+  active?: boolean;
+  rewardType: 'FREE_PRODUCT' | 'DISCOUNT_PCT' | 'DISCOUNT_AMOUNT' | 'TWO_FOR_ONE';
+  rewardValue?: number | null;
+  rewardProduct?: string | null;
+  audienceDays?: number[];
+  audienceFromHour?: number | null;
+  audienceToHour?: number | null;
+  capPerPlayer?: number | null;
+  capPerPeriod?: number | null;
+  capTotal?: number | null;
+  periodDays?: number | null;
+  rules: PromotionRuleInput[];
+  startsAt?: string | null;
+  endsAt?: string | null;
+};
+
+export type PromotionRuleItem = PromotionRuleInput & { id: string; promotionId: string };
+
+export type PromotionItem = PromotionInput & {
+  id: string;
+  createdAt: string;
+  rules: PromotionRuleItem[];
+};
 
 export const api = {
   login: (code: string, name?: string) =>
@@ -169,6 +230,11 @@ export const api = {
     }),
   ownerKioskStats: (id: string) =>
     request<KioskStats>(`/owner/kiosks/${id}/stats`),
+  validateRedemption: (code: string) =>
+    request<RedemptionValidation>('/owner/redemptions/validate', {
+      method: 'POST',
+      body: JSON.stringify({ code }),
+    }),
   adminLogin: (email: string, password: string) =>
     request('/auth/admin/login', {
       method: 'POST',
@@ -178,5 +244,26 @@ export const api = {
   adminValidateOwner: (id: string) =>
     request<AdminOwnerItem>(`/admin/owners/${id}/validate`, {
       method: 'PATCH',
+    }),
+  ownerKioskPromotions: (kioskId: string) =>
+    request<PromotionItem[]>(`/promotions/kiosk/${kioskId}`),
+  ownerCreatePromotion: (body: PromotionInput) =>
+    request<PromotionItem>('/promotions', {
+      method: 'POST',
+      body: JSON.stringify(body),
+    }),
+  ownerUpdatePromotion: (id: string, body: Partial<PromotionInput>) =>
+    request<PromotionItem>(`/promotions/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(body),
+    }),
+  ownerTogglePromotion: (id: string, active: boolean) =>
+    request<PromotionItem>(`/promotions/${id}/toggle`, {
+      method: 'PATCH',
+      body: JSON.stringify({ active }),
+    }),
+  ownerDeletePromotion: (id: string) =>
+    request<void>(`/promotions/${id}`, {
+      method: 'DELETE',
     }),
 };
