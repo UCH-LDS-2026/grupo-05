@@ -34,6 +34,8 @@ export type KioskListItem = {
   visitCount: number;
   reviewCount: number;
   avgRating: number | null;
+  lat?: number | null;
+  lng?: number | null;
 };
 
 export type ReviewItem = {
