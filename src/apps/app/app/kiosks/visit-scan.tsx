@@ -2,6 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Alert, Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import WebQrScanner from '../../components/WebQrScanner';
 import { api } from '../../lib/api';
 import { colors, radius, space } from '../../theme';
 
@@ -33,8 +34,10 @@ export default function VisitScanScreen() {
     let mounted = true;
 
     if (Platform.OS === 'web') {
-      setCameraAvailable(false);
-      setManualMode(true);
+      const hasBrowserCamera = typeof navigator !== 'undefined' && !!navigator.mediaDevices?.getUserMedia;
+      setCameraAvailable(hasBrowserCamera);
+      setCameraPermissionGranted(hasBrowserCamera);
+      setManualMode(!hasBrowserCamera);
       return () => {
         mounted = false;
       };
@@ -92,6 +95,16 @@ export default function VisitScanScreen() {
 
   async function requestCamera() {
     setCameraError(null);
+    if (Platform.OS === 'web') {
+      const hasBrowserCamera = typeof navigator !== 'undefined' && !!navigator.mediaDevices?.getUserMedia;
+      setCameraAvailable(hasBrowserCamera);
+      setCameraPermissionGranted(hasBrowserCamera);
+      setManualMode(!hasBrowserCamera);
+      if (!hasBrowserCamera) {
+        setCameraError('Este navegador no permite abrir la cámara. Ingresá el código manualmente.');
+      }
+      return;
+    }
     if (!cameraModule) {
       setCameraError('No se encontró una cámara disponible.');
       setManualMode(true);
@@ -174,6 +187,22 @@ export default function VisitScanScreen() {
   }
 
   const CameraComponent = cameraModule?.CameraView;
+
+  if (Platform.OS === 'web') {
+    return (
+      <WebQrScanner
+        label={submitting ? 'Registrando visita...' : 'Enfocá el QR diario del mostrador'}
+        disabled={submitting}
+        onClose={() => router.back()}
+        onManual={() => setManualMode(true)}
+        onScanned={(data) => {
+          if (scanLocked.current || submitting) return;
+          scanLocked.current = true;
+          void submitScan(data);
+        }}
+      />
+    );
+  }
 
   return (
     <View style={styles.container}>

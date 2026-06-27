@@ -11,6 +11,7 @@ import {
   View,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import WebQrScanner from '../../components/WebQrScanner';
 import { api, RedemptionRedeemed } from '../../lib/api';
 import { clearSession } from '../../lib/storage';
 import { colors, radius, space } from '../../theme';
@@ -57,7 +58,9 @@ export default function OwnerRedeemScreen() {
     let mounted = true;
 
     if (Platform.OS === 'web') {
-      setCameraAvailable(false);
+      const hasBrowserCamera = typeof navigator !== 'undefined' && !!navigator.mediaDevices?.getUserMedia;
+      setCameraAvailable(hasBrowserCamera);
+      setCameraPermissionGranted(hasBrowserCamera);
       return () => {
         mounted = false;
       };
@@ -110,6 +113,19 @@ export default function OwnerRedeemScreen() {
 
   async function openScanner() {
     setScannerError(null);
+    if (Platform.OS === 'web') {
+      const hasBrowserCamera = typeof navigator !== 'undefined' && !!navigator.mediaDevices?.getUserMedia;
+      if (!hasBrowserCamera) {
+        setCameraAvailable(false);
+        setScannerError('Este navegador no permite abrir la cámara. Ingresá el código manualmente.');
+        return;
+      }
+      setCameraAvailable(true);
+      setCameraPermissionGranted(true);
+      scanLocked.current = false;
+      setScanning(true);
+      return;
+    }
     if (cameraAvailable === null) {
       setScannerError('No se pudo confirmar la cámara. Ingresá el código manualmente.');
       return;
@@ -131,6 +147,22 @@ export default function OwnerRedeemScreen() {
   }
 
   if (scanning) {
+    if (Platform.OS === 'web') {
+      return (
+        <WebQrScanner
+          label="Enfocá el QR del cliente"
+          disabled={submitting}
+          onClose={() => setScanning(false)}
+          onManual={() => setScanning(false)}
+          onScanned={(data) => {
+            if (scanLocked.current || submitting) return;
+            scanLocked.current = true;
+            void confirmCode(data);
+          }}
+        />
+      );
+    }
+
     const CameraComponent = cameraModule?.CameraView;
     if (!CameraComponent) {
       return (
